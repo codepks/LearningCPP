@@ -121,3 +121,24 @@ In the dynamic casting we are making DerivedClass pointer point to Base class ob
 DerivedClass* derived = dynamic_cast<DerivedClass*>(base);
 ```
 During Dynamic Casting, the casting checks if the object being pointed to (Base class here by base *) by a pointer(Derived Class pointer here) is an instance of Derived Class or not.
+
+
+# Reinterpret_Cast
+It doesn't work on the basis of polymorphic behavior like Dynamic casting does.
+
+In the code below:
+```
+DerivedClass* derived = reinterpret_cast<DerivedClass*>(base);
+```
+reinterpret_cast takes the BaseClass pointer base and forcefully reinterprets the bits of its address as if they were a DerivedClass pointer.
+**It simply creates a new pointer of the target type with the same memory address as the original pointer.**
+
+Since derived is a DerivedClass pointer, the compiler expects a DerivedClass object with its own virtual function table (vtable).
+However, the actual object doesn't have a vtable for DerivedClass. It only has the vtable for BaseClass.
+When derived->func2(); is called, the compiler incorrectly looks up func2 in the DerivedClass vtable, but it finds the base class version instead.
+reinterpret_cast only changes the pointer's type, not the underlying object's layout or behavior.
+It doesn't magically insert the missing derived class members or vtable into the BaseClass object.
+Technically, attempting to call a derived class function on a BaseClass object using a reinterpret_cast pointer is undefined behavior in C++.
+
+
+
