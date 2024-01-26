@@ -123,7 +123,7 @@ DerivedClass* derived = dynamic_cast<DerivedClass*>(base);
 During Dynamic Casting, the casting checks if the object being pointed to (Base class here by base *) by a pointer(Derived Class pointer here) is an instance of Derived Class or not.
 
 
-# Reinterpret_Cast
+## Reinterpret_Cast
 It doesn't work on the basis of polymorphic behavior like Dynamic casting does.
 
 In the code below:
@@ -143,3 +143,45 @@ Technically, attempting to call a derived class function on a BaseClass object u
 
 
 
+# C-Style enums vs Class Enums
+
+## Intro
+C-Style enums
+```
+enum Color {green, yellow, blue};
+
+int main()
+{
+	std::cout << green; //works
+}
+```
+
+Class enums
+```
+enum Class Color {green, yellow, blue};
+
+int main()
+{
+	std::cout << green;	   //doesn't work
+	std::cout << Color::green; //works
+}
+```
+
+## Differences
+enum classes are better in these many ways:
+
+1. enum classes can be type specified
+```
+enum class Color : unsigned int {  // Enum class with underlying type specified
+    Red = 1,
+    Green,
+    Blue };
+```
+
+2. enum values can be initialized
+```
+enum class Day {  // Enum class without specified underlying type
+    Monday = 1,
+    Tuesday,
+    Wednesday };
+```
