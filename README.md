@@ -135,7 +135,7 @@ reinterpret_cast takes the BaseClass pointer base and forcefully reinterprets th
 
 Since derived is a DerivedClass pointer, the compiler expects a DerivedClass object with its own virtual function table (vtable).
 However, the actual object doesn't have a vtable for DerivedClass. It only has the vtable for BaseClass.
-When derived->func2(); is called, the compiler incorrectly looks up func2 in the DerivedClass vtable, but it finds the base class version instead.  return
+When derived->func2(); is called, the compiler incorrectly looks up func2 in the DerivedClass vtable, but it finds the base class version instead.  <br>
 reinterpret_cast only changes the pointer's type, not the underlying object's layout or behavior.
 It doesn't magically insert the missing derived class members or vtable into the BaseClass object.
 Technically, attempting to call a derived class function on a BaseClass object using a reinterpret_cast pointer is undefined behavior in C++.
