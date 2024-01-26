@@ -76,6 +76,44 @@ if (derivedPtr) {
 }
 ```
 
+### Dyanamic Casting Failure
 
+```
+class BaseClass
+{
+public:
+	BaseClass() = default;
+	~BaseClass() = default;
 
+	void func1() { std::cout << "This is a base class func1\n"; };
+	virtual void func2() { std::cout << "This is base class func2\n"; };
+};
+
+class DerivedClass : public BaseClass
+{
+public:
+	DerivedClass() = default;
+	~DerivedClass() = default;
+
+	void func1() { std::cout << "This is a derived class func1\n"; };
+	void func2() override { std::cout << "This is derived class func2\n"; };
+};
+
+int main()
+{
+	BaseClass *base = new BaseClass();
+	base->func2();
+	//downcasting
+	DerivedClass* derived = dynamic_cast<DerivedClass*>(base); 
+
+	derived->func2();
+	// *Casting fails*
+}
+```
+
+The dynamic casting fails because the base pointer points to an object of type BaseClass, not DerivedClass. Even though the object was created as a BaseClass, the dynamic cast to DerivedClass* in the line :
+
+```
+DerivedClass* derived = dynamic_cast<DerivedClass*>(base);
+```
 
