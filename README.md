@@ -44,4 +44,38 @@ DerivedClass vtable:
 ---------------------
 ```
 
+When a class is polymorphic (contains virtual functions), the compiler creates a hidden pointer in each object of that class. This pointer, called the **virtual pointer (vptr)**, points to the vtable of the dynamic type of the object.
+
+## Static vs Dynamic vs Reinterpret Cast
+
+### Static Casting
+Static casting is done when you know the data types already:
+E.g. conversion of float to int. The type is known during compile time.
+
+### Dynamic Casting
+Dynamic casting is done when the classes involved in conversion have virtual function and their behaviour is known during run time.
+Types : Upcasting - derived to parent case class, where loss of information happens
+Downcasting : parent to derived class : information can be restored.
+
+```
+class Base {
+    virtual void foo() {};
+};
+
+class Derived : public Base {
+    void foo () {};
+};
+
+Base* basePtr = new Derived;	//Upcasting - Loss of Information
+Derived* derivedPtr = dynamic_cast<Derived*>(basePtr);	//Downcasting - Retrieve back information
+
+if (derivedPtr) {
+    // Successfully casted
+} else {
+    // Cast failed
+}
+```
+
+
+
 
