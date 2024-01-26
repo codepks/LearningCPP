@@ -1,6 +1,6 @@
 # LearningCPP
 
-## Virtual Table
+# Virtual Table
 When a function contains virtual function than virtual table corresponding to that class is generated during compile time.
 
 Let's look at virtual table of this class:
@@ -46,13 +46,13 @@ DerivedClass vtable:
 
 When a class is polymorphic (contains virtual functions), the compiler creates a hidden pointer in each object of that class. This pointer, called the **virtual pointer (vptr)**, points to the vtable of the dynamic type of the object.
 
-## Static vs Dynamic vs Reinterpret Cast
+# Static vs Dynamic vs Reinterpret Cast
 
-### Static Casting
+## Static Casting
 Static casting is done when you know the data types already:
 E.g. conversion of float to int. The type is known during compile time.
 
-### Dynamic Casting
+## Dynamic Casting
 Dynamic casting is done when the classes involved in conversion have virtual function and their behaviour is known during run time.
 Types : Upcasting - derived to parent case class, where loss of information happens
 Downcasting : parent to derived class : information can be restored.
