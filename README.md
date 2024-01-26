@@ -29,6 +29,8 @@ public:
 ```
 
 Virtual table of Base class:
+*BaseClass contains a virtual function func2().
+When an object of BaseClass is created, it contains a hidden virtual pointer (vptr) that points to the vtable of BaseClass.*
 ```
 BaseClass vtable:
 ---------------------
@@ -37,6 +39,7 @@ BaseClass vtable:
 ```
 Virtual table of Derived class:
 
+*DerivedClass also contains a virtual function func2(), which overrides the same function in BaseClass. When an object of DerivedClass is created, it contains a vptr that points to the vtable of DerivedClass.*
 ```
 DerivedClass vtable:
 ---------------------
@@ -76,7 +79,7 @@ if (derivedPtr) {
 }
 ```
 
-### Dyanamic Casting Failure
+### Casting Failure
 
 ```
 class BaseClass
@@ -111,9 +114,10 @@ int main()
 }
 ```
 
-The dynamic casting fails because the base pointer points to an object of type BaseClass, not DerivedClass. Even though the object was created as a BaseClass, the dynamic cast to DerivedClass* in the line :
+The dynamic casting fails because, intially base pointer points to BaseClass object.
+In the dynamic casting we are making DerivedClass pointer point to Base class object where it fails.
 
 ```
 DerivedClass* derived = dynamic_cast<DerivedClass*>(base);
 ```
-
+During Dynamic Casting, the casting checks if the object being pointed to (Base class here by base *) by a pointer(Derived Class pointer here) is an instance of Derived Class or not.
