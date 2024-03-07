@@ -2,7 +2,12 @@
 
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
-## Declation vs Definition
+
+## Declaration vs Definition
+- **Declaration** tells compiler about existense of a variable/function/symbol and it memory address and required storage may not be defined
+- **Definition** tells the compiler about what the body of the variable/function/symbol contains and how much memory is required to store it
+- In case of reference variables and pointers declarations along with definitions is necessary. In case of pointers they need to have a fixed memory independent of the memory type they are pointing to, in face in deferencing the pointer definition becomes important.
+
 
 
 # Virtual Table
