@@ -30,7 +30,13 @@ int x = 42;   // definition
 
 In C++ we forward declare the variable/function with its **type and name without its definition**, so that we can use its body. Doing this save **unncessary compilation**.
 
-
+_Example_
+```
+//someFile.hpp
+class Class;
+void f(Class object);
+```
+**One definition rule** : You can forward declare as many times as possible but definition can exist only once
 
 # Virtual Table
 When a function contains virtual function than virtual table corresponding to that class is generated during compile time.
