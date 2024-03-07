@@ -8,16 +8,28 @@ source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-in
 - **Definition** tells the compiler about what the body of the variable/function/symbol contains and how much memory is required to store it
 - In case of reference variables and pointers declarations along with definitions is necessary. In case of pointers they need to have a fixed memory independent of the memory type they are pointing to, in face in deferencing the pointer definition becomes important.
 
-Functions
+**Functions**
 ```
 int f();               // declaration
 int f() { return 42; } // definition
 ```
 
-Variables
+**Variables**
 ```
-int x;
+int x;		//both a declaration and definition
 ```
+x in the case above is initialised with 0 via default constructor of int.
+
+**Separating Declaration and Definition for variables**
+```
+extern int x; // declaration
+int x = 42;   // definition
+```
+
+## Foward Declaration
+
+In C++ we forward declare the variable/function with its **type and name without its definition**, so that we can use its body. Doing this save **unncessary compilation**.
+
 
 
 # Virtual Table
