@@ -179,7 +179,28 @@ reinterpret_cast only changes the pointer's type, not the underlying object's la
 It doesn't magically insert the missing derived class members or vtable into the BaseClass object.
 Technically, attempting to call a derived class function on a BaseClass object using a reinterpret_cast pointer is undefined behavior in C++.
 
+# Function Pointers
 
+## Typedef
+```
+typedef return_type (*FunctionPtr)(parameter_types...);
+
+typedef void (*MyFunctionPtr)();
+```
+
+## using 
+```
+using FunctionPtr = return_type (*)(parameter_types...);
+
+using MyFunctionPtr = void (*)();
+```
+
+## std::function
+```
+using FunctionType = std::function<return_type(parameter_types...)>;
+
+using MyFunctionType = std::function<void()>;
+```
 
 # C-Style enums vs Class Enums
 
