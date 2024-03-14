@@ -1,7 +1,7 @@
 # LearningCPP
 
 # Introdcution
-The number of bits that make up a single command vary -- for example, some CPUs process instructions that are always 32 bits long, whereas some other CPUs (such as the x86/x64 family, which you may be using) have instructions that can be a variable length. <b>
+The number of bits that make up a single command vary -- for example, some CPUs process instructions that are always 32 bits long, whereas some other CPUs (such as the x86/x64 family, which you may be using) have instructions that can be a variable length. <br>
 
 **Assemly language**, for e.g., ```mov al, 061h``` sits on top of Machine Language which is atleast readable and writable and is still used today when speed is critical. An **Assembler** converts Assembly langugage to Machine langugage. <br>
 It is still not very portable. <br>
