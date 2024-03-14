@@ -1,5 +1,20 @@
 # LearningCPP
 
+# Introdcution
+The number of bits that make up a single command vary -- for example, some CPUs process instructions that are always 32 bits long, whereas some other CPUs (such as the x86/x64 family, which you may be using) have instructions that can be a variable length. <b>
+
+**Assemly language**, for e.g., ```mov al, 061h``` sits on top of Machine Language which is atleast readable and writable and is still used today when speed is critical. An **Assembler** converts Assembly langugage to Machine langugage. <br>
+It is still not very portable. <br>
+
+Much like assembly programs, programs written in high level languages must be translated into a format the computer can understand before they can be run. There are two primary ways this is done: **compiling and interpreting**. <br>
+
+
+
+
+
+
+
+
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 
