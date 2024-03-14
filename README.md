@@ -8,7 +8,7 @@ It is still not very portable. <br>
 
 Much like assembly programs, programs written in high level languages must be translated into a format the computer can understand before they can be run. There are two primary ways this is done: **compiling and interpreting**. <br>
 
-A **compiler** is a program (or collection of programs) that reads source code (typically written in a high-level language) and translates it into some other language (typically a low-level language, such as assembly or machine language, etc…). <br> 
+A **compiler** is a program (or collection of programs) that reads source code (typically written in a high-level language) and translates it into some other language (typically a low-level language, such as assembly or machine language, etc…). Over the years, compilers have become very good at producing fast, optimized code, and in some cases can do a better job than humans can in assembly language! <br> 
 
 An **interpreter** is a program that directly executes the instructions in the source code without requiring them to be compiled into an executable first. But **interpreter** must be installed on every machine where an interpreted program will be run.
 
