@@ -130,7 +130,7 @@ public:
 
 NOTE: IF you checked the box for creating the precompiler header file and not included the pch.h/stdafx.h in your any of the source files then it will give error and **it should be top of all the headers in a file.**
 
-## compile, build, rebuild, clean
+## Compile, build, rebuild, clean
 
 When a code file is compiled, your IDE may cache the resulting object file. That way, if the program is compiled again in the future, any code file that hasn’t been modified doesn’t need to be recompiled -- the cached object file from last time can be reused. This can speed up compilation times significantly (at the cost of a little bit of disk space). <br>
 
