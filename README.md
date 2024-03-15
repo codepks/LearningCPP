@@ -127,7 +127,7 @@ public:
 };	
 ```
 
-NOTE: IF you checked the box for creating the precompiler header file and not included the pch.h/stdafx.h in your any of the source files then it will give error.
+NOTE: IF you checked the box for creating the precompiler header file and not included the pch.h/stdafx.h in your any of the source files then it will give error and **it should be top of all the headers in a file.**
 
 ## compile, build, rebuild, clean
 
@@ -138,6 +138,41 @@ With that in mind, here’s what each of the options typically does: <br>
 - **Build** compiles all modified code files in the project or workspace/solution, and then links the object files into an executable. If no code files have been modified since the last build, this option does nothing.
 - **Clean** removes all cached objects and executables so the next time the project is built, all files will be recompiled and a new executable produced.
 - **Rebuild** does a “clean”, followed by a “build”.
+
+## Common C++ Problems
+
+**Q: When compiling my program, I get a ‘no newline at end of file’ error** <br>
+> The C++ standard requires that all source (.cpp) files end in a newline. It’s silly, but it is what it is. Go to the bottom of your source file(s), hit enter, save, and recompile
+
+**Q: When I compile my program, I get a warning about "Cannot find or open the PDB file"** <br>
+This is a warning, not an error, so it shouldn’t impact your program. However, it is annoying. To fix it, go into the Debug menu -> Options and Settings -> Symbols, and check “Microsoft Symbol Server”.
+
+## Build Configuration
+
+**General Settings**
+- What the executable will be named
+- What directories the IDE will look in for other code and library files
+- Whether to keep or strip out debugging information
+- How much to have the compiler optimize your program etc.
+
+### Debug Confiuration
+- This configuration turns off all optimizations
+- Includes debugging information
+- Makes your programs larger and slower
+- The debug configuration is usually selected as the active configuration by default
+
+### Release Configuration
+ - This version is typically optimized for size and performance, and doesn’t contain the extra debugging information
+
+**GCC/G++ Compiler**
+Add `-ggdb` to the command line when debugging and `-O2 -DNDEBUG` for release builds. Use the former for now.
+
+**Disable compiler extension - Visual Studio**
+- To disable compiler extensions, right click on your project name in the Solution Explorer window, then choose **Properties**
+- From the Project dialog, first make sure the Configuration field is set to **All Configurations**.
+- Then, click C/C++ > Language tab, and set **Conformance mode to Yes (/permissive-)** (if it is not already set to that by default).
+- For GCC/B++You can disable compiler extensions by adding the ```-pedantic-errors``` flag to the compile command line.
+
 
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
