@@ -32,9 +32,75 @@ In large projects (those with many code files), precompiled headers can improve 
 
 However, precompiled headers require extra work to use, and for small projects (such as those you’ll create in our tutorials) make little to no difference in compilation times. <br>
 
-> Background <br>
-> When you create a new project in Visual Studio, a precompiled header file named pch.h is added to the project. (In Visual Studio 2017 and earlier, the file was called stdafx.h.) The purpose of the file is to speed up the build process. <br>
+> **Background** <br>
+> When you create a new project in Visual Studio, a precompiled header file named **pch.h** is added to the project. (In Visual Studio 2017 and earlier, the file was called **stdafx.h**.) The purpose of the file is to speed up the build process. <br>
 > Any stable header files, for example Standard Library headers such as <vector>, should be included here. The precompiled header is compiled only when it, or any files it includes, are modified. If you only make changes in your project source code, the build will skip compilation for the precompiled header.
+
+(**Stackoverflow**)[https://stackoverflow.com/questions/903228/why-use-precompiled-headers-c-c] <br>
+In C/C++, the #include mechanism is a textual copy of the file specified into the current file. Headers include other headers (which include yet other headers), so when you do a #include, it could be adding tens of thousands of lines of C++ into each cpp file (or cxx, c, whatever), all of which need to be compiled each time. This can be a severe bottleneck for large projects. <br>
+
+Precompiled headers speed this up by compiling each header once, then including that compiled state into the cpp they are included in. <br>
+
+One important note on Visual Studio: make sure the first #include in each header is #include "stdafx.h". <br>
+
+### Example Usage
+Your automation folder may required a lot of header files which need to be precompiled before your tests start running. 
+
+**stdafx.h**
+```
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
+
+#pragma once
+
+#include "targetver.h"
+
+// Headers for CppUnitTest
+#include <Windows.h>
+#include "CppUnitTest.h"
+
+#include "../../../Assets/API/model.engine/Jit__Stage.h"
+#include "../../../Assets/API/model.engine/Base__Machine.h"
+#include "../../../Assets/API/model.engine/Machine__Flags.h"
+#include "../../../Assets/API/model.engine/Engine.h"
+#include "../../../Assets/API/model.engine/Shared__Tags.h"
+#include "../../../Assets/API/model.engine/Model__Builder.h"
+#include "../../../Assets/API/model.engine/Active__Builder.h"
+#include "../../../Assets/API/model.engine/Chamber__Actions.h"
+#include "../../../Assets/API/model.engine/Json__Helper.h"
+
+#include "gmock/gmock.h"
+```
+
+**stdafx.cpp**
+```
+// stdafx.cpp : source file that includes just the standard includes
+// model.engine.Tests.pch will be the pre-compiled header
+// stdafx.obj will contain the pre-compiled type information
+
+#include "stdafx.h"
+
+// The following lines pull in the real gmock *.cc files.
+#include "../../../3rdParty/googletest-master/googlemock/src/gmock-cardinalities.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gmock-internal-utils.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gmock-matchers.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gmock-spec-builders.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gmock.cc"
+
+// The following lines pull in the real gtest *.cc files.
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-death-test.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-filepath.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-port.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-printers.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-test-part.cc"
+#include "../../../3rdParty/googletest-master/googlemock/src/gtest-typed-test.cc"
+
+// TODO: reference any additional headers you need in STDAFX.H
+// and not in this file
+```
 
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
