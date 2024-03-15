@@ -33,7 +33,7 @@ In large projects (those with many code files), precompiled headers can improve 
 However, precompiled headers require extra work to use, and for small projects (such as those you’ll create in our tutorials) make little to no difference in compilation times. <br>
 
 > Background <br>
-> When you create a new project in Visual Studio, a precompiled header file named pch.h is added to the project. (In Visual Studio 2017 and earlier, the file was called stdafx.h.) The purpose of the file is to speed up the build process.
+> When you create a new project in Visual Studio, a precompiled header file named pch.h is added to the project. (In Visual Studio 2017 and earlier, the file was called stdafx.h.) The purpose of the file is to speed up the build process. <br>
 > Any stable header files, for example Standard Library headers such as <vector>, should be included here. The precompiled header is compiled only when it, or any files it includes, are modified. If you only make changes in your project source code, the build will skip compilation for the precompiled header.
 
 # Basics
