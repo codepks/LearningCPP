@@ -36,8 +36,8 @@ However, precompiled headers require extra work to use, and for small projects (
 > When you create a new project in Visual Studio, a precompiled header file named **pch.h** is added to the project. (In Visual Studio 2017 and earlier, the file was called **stdafx.h**.) The purpose of the file is to speed up the build process. <br>
 > Any stable header files, for example Standard Library headers such as <vector>, should be included here. The precompiled header is compiled only when it, or any files it includes, are modified. If you only make changes in your project source code, the build will skip compilation for the precompiled header.
 
-(Source)[https://stackoverflow.com/questions/903228/why-use-precompiled-headers-c-c]
-In C/C++, the #include mechanism is a textual copy of the file specified into the current file. Headers include other headers (which include yet other headers), so when you do a #include, it could be adding tens of thousands of lines of C++ into each cpp file (or cxx, c, whatever), all of which need to be compiled each time. This can be a severe bottleneck for large projects. <br>
+[**StackOverFlow**](https://stackoverflow.com/questions/903228/why-use-precompiled-headers-c-c)
+<br>In C/C++, the #include mechanism is a textual copy of the file specified into the current file. Headers include other headers (which include yet other headers), so when you do a #include, it could be adding tens of thousands of lines of C++ into each cpp file (or cxx, c, whatever), all of which need to be compiled each time. This can be a severe bottleneck for large projects. <br>
 
 Precompiled headers speed this up by compiling each header once, then including that compiled state into the cpp they are included in. <br>
 
