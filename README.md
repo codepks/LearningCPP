@@ -229,10 +229,46 @@ Note that the difference between the data and BSS segments is that the former st
 >  - If I have an uninitialised const var, then it is stored in the BSS segment...
 >  - In the GCC compiler, on most machines, read-only variables, constants, and jump tables are placed in the text section.
 
-## Assignment
-By default, assignment copies the value on the right-hand side of the = operator to the variable on the left-hand side of the operator. This is called **copy assignment**. <br>
+## Types of Initilization
 
+### Default Initilization
+ Leaves a variable with an indeterminate value.
+```
+int a
+```
 
+### Copy / Implicit Initilization 
+- Copy assignment copies the value on the right-hand side of the = operator to the variable on the left-hand side of the operator
+- Copy initialization **had fallen out of favor** in modern C++ due to being **less efficient** than other forms of initialization for some complex types.
+```
+int width = 5; // copy initialization of value 5 into variable width
+```
+
+### Direct / Explicit Initialization
+- When an initial value is provided inside parenthesis.
+- Direct initialization was initially introduced to allow for more efficient initialization of complex objects
+- Just like copy initialization, direct initialization **had fallen out of favor in modern C++**, largely **due to being superseded by list initialization**
+- Direct initialization is also used when values are explicitly **cast to another type**
+ 
+```
+int width( 5 ); // direct initialization of value 5 into variable width
+```
+
+- One of the reasons direct initialization had fallen out of favor is because it makes it hard to differentiate variables from functions. For example:
+```
+int x();  // forward declaration of function x
+int x(0); // definition of variable x with initializer 0
+```
+
+### List Initilization
+- The modern way to initialize objects in C++ is to use a form of initialization that makes use of curly braces
+
+```
+int width { 5 };    // direct list initialization of initial value 5 into variable width
+int height = { 6 }; // copy list initialization of initial value 6 into variable height
+int depth {};       // value initialization (see next section)
+```
+- List initialization was introduced to provide a more consistent initialization syntax (which is why it is sometimes called **uniform initialization** ) that works in most cases contrary to copy initilization and direct initilization
 
 
 
