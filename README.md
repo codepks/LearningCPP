@@ -192,6 +192,13 @@ Turn your warning levels up to the maximum, especially while you are learning. I
 **GCC/G++ Users** <br>
 Add the following flags to your command line: -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion
 
+### Warning as Errors
+Enable “Treat warnings as errors”. This will force you to resolve all issues causing warnings. <br>
+- To treat warnings as errors, right click on your project name in the Solution Explorer window, then choose Properties
+- From the Project dialog, first make sure the Configuration field is set to All Configurations
+- Then select C/C++ > General tab and set Treat Warnings As Errors to Yes (/WX).
+- For GCC/G++ users : Add the following flag to your command line: ```-Werror```
+
 
 
 
