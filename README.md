@@ -269,13 +269,93 @@ int height = { 6 }; // copy list initialization of initial value 6 into variable
 int depth {};       // value initialization (see next section)
 ```
 - List initialization was introduced to provide a more consistent initialization syntax (which is why it is sometimes called **uniform initialization** ) that works in most cases contrary to copy initilization and direct initilization
+- list initialization is generally preferred over the other initialization forms because it works in most cases, it **disallows narrowing conversions** where as in direct or copy initilization it may to implicit conversions. 
+```
+int width { 4.5 }; // error: a number with a fractional value can't fit into an int
+```
+In the above given example list initilization throws error whereas in other cases it will grop the fraction part.
 
+### Value or Zero Initilization
+When a variable is initialized using **empty braces**, value initialization takes place
+```
+int x {};      // value initialization
+std::cin >> x; // we're immediately replacing that value
+```
 
+### Unused Variables
+Sometimes you may leave your variables unused intentionally and compilers give warnings or sometimes errors too,
+In order to get over this one case use ```[[maybe_unused]]```
 
+```
+int main()
+{
+    [[maybe_unused]] double pi { 3.14159 };
+    [[maybe_unused]] double gravity { 9.8 };
+    [[maybe_unused]] double phi { 1.61803 };
 
-source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
+    // the above variables will not generate unused variable warnings
+
+    return 0;
+}
+```
+
+## cout, cin, and endl
+- We use `std::cout`, along with the **insertion operator (<<)**
+- Insertion operator (<<) can be used multiple times in a single statement to **concatenate** (link together) multiple pieces of output
+```
+std::cout << "Hello" << " world!";
+```
+
+### std::cout is bufferred
+Statements in our program request that output be sent to the console. However, that output is typically not sent to the console immediately. Instead, the requested output “**gets in line**”, and is stored in a region of memory set aside to collect such requests (called a buffer). Periodically, the buffer is flushed, meaning all of the data collected in the buffer is transferred to its destination (in this case, the console). <br><br>
+
+This also means that if your program crashes, aborts, or is paused (e.g. for debugging purposes) before the buffer is flushed, any output still waiting in the buffer will not be displayed. <br>
+Writing data to a buffer is typically fast, whereas transferring a batch of data to an output device is comparatively slow. <br>
+
+### std::endl vs '\n'
+The ‘\n’ character moves the cursor to the next line of the console, but doesn’t request a flush, so it will often perform better whereas std::endl works on buffer methodology
+
+### std::cin 
+**>>** is called **extraction operator** called in case if std::cin
+
+```
+int x{}; //It is a good practice to initialize a variable before being used
+std::cin >> x;
+```
+
+## Uninitialized Variable
+When a variable that is not initialized is given a memory address to use to store data, the default value of that variable is whatever (garbage) value happens to already be in that memory address. <br>
+
+**Potential performance issue** <br>
+Imagine a case where you were going to read in 100,000 values from a file. In such case, you might create 100,000 variables, then fill them with data from the file.<br>
+
+If C++ initialized all of those variables with default values upon creation, this would result in 100,000 initializations (which would be slow), and for little benefit (since you’re overwriting those values anyway). <br>
+
+You should always initialize your variables because the cost of doing so is minuscule compared to the benefit.
+
+**Visual Studio Presetting** <br>
+Visual Studio, will initialize the contents of memory to some **preset value** when you’re using a **debug build configuration**. This will not happen when using a release build configuration. Therefore, if you want to run the above program yourself, make sure you’re using a release build configuration.
+
+## Keyword and convenstions :
+- Underscores used for variables and intercaps used for functions.
+- You should avoid naming your identifiers starting with an underscore, as these names are typically reserved for OS, library, and/or compiler use.
+- A good rule of thumb is to make the length of an identifier proportional to how widely it is used . `i` vs 'count`
+
+## Whitespacing and formatting
+**Lines should not be too long** <br>
+Typically, 80 characters has been the de facto standard for the maximum length a line should be. If a line is going to be longer, it should be split (at a reasonable spot) into multiple lines. <br> You can have extensions/plugin for **column guide** <br>
+
+If a long line is split with an operator (eg. << or +), the operator should be placed at the beginning of the next line, not the end of the current line
+```
+std::cout << 3 + 4
+    + 5 + 6
+    * 7 * 8;
+```
+
+**One exception**: If you are working in someone else’s code base, adopt their styles. It’s better to favor consistency than your preferences.
 
 ## Declaration vs Definition
+source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 - **Declaration** tells compiler about existense of a variable/function/symbol and it memory address and required storage may not be defined
 - **Definition** tells the compiler about what the body of the variable/function/symbol contains and how much memory is required to store it
 - In case of reference variables and pointers declarations along with definitions is necessary. In case of pointers they need to have a fixed memory independent of the memory type they are pointing to, in face in deferencing the pointer definition becomes important.
