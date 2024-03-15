@@ -102,6 +102,31 @@ Your automation folder may required a lot of header files which need to be preco
 // and not in this file
 ```
 
+Later you to **include** the `stadafx.h` in your mockfiles
+
+```
+#pragma once
+#include "stdafx.h"
+#include "../../../Assets/API/model.__engine/IBuildState__Manager.h"
+
+namespace Cartman {
+class MockBuildState__Manager : public IBuildState__Manager {		
+public:
+
+	MockBuildState__Manager() { };
+
+	MOCK_METHOD(EPause__Condition, getPause__Condition, (), (const));
+
+	MOCK_METHOD(EState, getCurrent__State, (), ());
+
+	MOCK_METHOD(int, getRemaining__LayersToPause, (), (const));
+
+	MOCK_METHOD(long long, getRemaining__AutoPauseTime, (), (const));
+
+	MOCK_METHOD(void, update, (), ());
+};	
+```
+
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 
