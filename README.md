@@ -354,6 +354,31 @@ std::cout << 3 + 4
 
 **One exception**: If you are working in someone else’s code base, adopt their styles. It’s better to favor consistency than your preferences.
 
+## Operators 
+
+### Arity
+**Unary** : `-` is an example. '5' -> `-5` it flips the sign of the variable <br>
+**Binary** : `+`, `<<`, `>>` uses two operaands to work over like `3+4` or s`td::cout << x`
+**Ternary** : Requires 3 operands to operate like `?`
+**Nullary** : like `throw`
+
+### Precedence
+- `operator+` and `operator*` return sum and product value
+- `operator=` and `opearator<<` behave differently. `x = 5` returns x and `std::cout << 5` returns `std::cout`
+- `x = y = 5` evaluates as `x = (y = 5)`. First `y = 5` assigns `5` to `y`. This operation then returns `y`, which can then be assigned to `x`
+- `std::cout << "Hello " << "world"` evaluates as `(std::cout << "Hello ") << "world!"` . This first prints `"Hello "` to the console. This operation returns `std::cout`, which can then be used to print `"world!"` to the console as well.
+
+## Expressions
+**Expression** is a sequence of literals, variables, operators and funtions calles that calculates a single value. Process of doing that is called **evaluation** and output is called **result** <br>
+
+> std::cout << x evaluates to the object std::cout <br>
+> This allows us to do things like std::cout << x << y << z and have it work properly. If operator<< returned nothing, then after x was output, it wouldn't know where to send y and z <br>
+
+**Expression Statement** : These are statements that consists of an expression followed by a semicolor. E.g. `x = 5;` A return value is geenrated from it , here it is `x` but it is discarded since it is not used. <br>
+
+## Best Practice
+New programmers often try to write an entire program all at once, and then get overwhelmed when it produces a lot of errors. A better strategy is to add **one piece at a time**, make sure it compiles, and test it. Then when you’re sure it’s working, move on to the next piece. <br>
+
 ## Declaration vs Definition
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 - **Declaration** tells compiler about existense of a variable/function/symbol and it memory address and required storage may not be defined
