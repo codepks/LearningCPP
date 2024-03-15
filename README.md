@@ -1,6 +1,6 @@
 # LearningCPP
 
-# Introdcution
+# Introduction
 The number of bits that make up a single command vary -- for example, some CPUs process instructions that are always 32 bits long, whereas some other CPUs (such as the x86/x64 family, which you may be using) have instructions that can be a variable length. <br>
 
 **Assemly language**, for e.g., ```mov al, 061h``` sits on top of Machine Language which is atleast readable and writable and is still used today when speed is critical. An **Assembler** converts Assembly langugage to Machine langugage. <br>
@@ -199,10 +199,18 @@ Enable “Treat warnings as errors”. This will force you to resolve all issues
 - Then select C/C++ > General tab and set Treat Warnings As Errors to Yes (/WX).
 - For GCC/G++ users : Add the following flag to your command line: ```-Werror```
 
-
-
+### Exporting Project Templates
+- In Visual Studio, this option is available via Project -> Export Template. Select “Project template”, add a name and optional description (e.g. C++20 console application), and then click “Finish”.
+- Next time you create a new project, you’ll see this template show up in your list of project templates.
+- Once you create a new project with this template, it may not open any files. You can open up your .cpp file in the Solution Explorer window by going to Solution -> <Project Name> -> Source Files -> <template name>.cpp.
 
 # Basics
+
+
+
+
+
+
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 
 ## Declaration vs Definition
