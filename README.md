@@ -127,6 +127,8 @@ public:
 };	
 ```
 
+NOTE: IF you checked the box for creating the precompiler header file and not included the pch.h/stdafx.h in your any of the source files then it will give error.
+
 # Basics
 source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
 
