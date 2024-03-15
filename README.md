@@ -43,7 +43,8 @@ Precompiled headers speed this up by compiling each header once, then including 
 
 One important note on Visual Studio: make sure the first #include in each header is #include "stdafx.h". <br>
 
-### Example Usage
+**Example Usage**
+
 Your automation folder may required a lot of header files which need to be precompiled before your tests start running. 
 
 **stdafx.h**
