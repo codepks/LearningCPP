@@ -205,6 +205,32 @@ Enable “Treat warnings as errors”. This will force you to resolve all issues
 - Once you create a new project with this template, it may not open any files. You can open up your .cpp file in the Solution Explorer window by going to Solution -> <Project Name> -> Source Files -> <template name>.cpp.
 
 # Basics
+- Programs typically terminate (finish running) after the last statement inside function main has been executed (though programs may abort early in some circumstances, or do some cleanup afterwards).
+- When an executable program finishes running, the program sends a value back to the operating system in order to indicate whether it ran successfully or not. This particular return statement returns the value 0 to the operating system, which means “everything went okay!”
+- The main memory in a computer is called **Random Access Memory** (often called **RAM** for short). When we run a program, the operating system loads the program into RAM
+- An object with a name is called a **variable** . An instantiated object is sometimes called an **instance**.
+
+## Storage 
+Depending on the data segmentation that a particular processor follows, we have five segments:
+
+- **Code Segment** - Stores only code, ROM
+- **BSS** (or Block Started by Symbol) Data segment - Stores initialised global and static variables
+- **Stack segment** - stores all the local variables and other informations regarding function return address etc
+- **Heap segment** - all dynamic allocations happens here
+
+Data BSS (or Block Started by Symbol) segment - stores uninitialised global and static variables.<br>
+Note that the difference between the data and BSS segments is that the former stores initialized global and static variables and the later stores UNinitialised ones. <br>
+
+**Every segment has a write protected region where all the constants are stored.** <br>
+
+> For example: <br>
+> - If I have a const int which is local variable, then it is stored in the write protected region of stack segment.
+>  - If I have a global that is initialised const var, then it is stored in the data segment.
+>  - If I have an uninitialised const var, then it is stored in the BSS segment...
+>  - In the GCC compiler, on most machines, read-only variables, constants, and jump tables are placed in the text section.
+
+## Assignment
+By default, assignment copies the value on the right-hand side of the = operator to the variable on the left-hand side of the operator. This is called **copy assignment**. <br>
 
 
 
