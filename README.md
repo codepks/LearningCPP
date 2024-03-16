@@ -369,6 +369,14 @@ std::cout << 3 + 4
 - `std::cout << "Hello " << "world"` evaluates as `(std::cout << "Hello ") << "world!"` . This first prints `"Hello "` to the console. This operation returns `std::cout`, which can then be used to print `"world!"` to the console as well.
 
 ## Expressions
+```
+int x{2+3};
+```
+The statement above can be translated as:
+```
+type identifier{Expression};
+```
+
 **Expression** is a sequence of literals, variables, operators and funtions calles that calculates a single value. Process of doing that is called **evaluation** and output is called **result** <br>
 
 > std::cout << x evaluates to the object std::cout <br>
@@ -379,41 +387,6 @@ std::cout << 3 + 4
 ## Best Practice
 New programmers often try to write an entire program all at once, and then get overwhelmed when it produces a lot of errors. A better strategy is to add **one piece at a time**, make sure it compiles, and test it. Then when you’re sure it’s working, move on to the next piece. <br>
 
-## Declaration vs Definition
-source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
-- **Declaration** tells compiler about existense of a variable/function/symbol and it memory address and required storage may not be defined
-- **Definition** tells the compiler about what the body of the variable/function/symbol contains and how much memory is required to store it
-- In case of reference variables and pointers declarations along with definitions is necessary. In case of pointers they need to have a fixed memory independent of the memory type they are pointing to, in face in deferencing the pointer definition becomes important.
-
-**Functions**
-```
-int f();               // declaration
-int f() { return 42; } // definition
-```
-
-**Variables**
-```
-int x;		//both a declaration and definition
-```
-x in the case above is initialised with 0 via default constructor of int.
-
-**Separating Declaration and Definition for variables**
-```
-extern int x; // declaration
-int x = 42;   // definition
-```
-
-## Foward Declaration
-
-In C++ we forward declare the variable/function with its **type and name without its definition**, so that we can use its body. Doing this save **unncessary compilation**.
-
-_Example_
-```
-//someFile.hpp
-class Class;
-void f(Class object);
-```
-**One definition rule** : You can forward declare as many times as possible but definition can exist only once
 
 # Virtual Table
 When a function contains virtual function than virtual table corresponding to that class is generated during compile time.
@@ -621,3 +594,265 @@ enum class Day {  // Enum class without specified underlying type
     Tuesday,
     Wednesday };
 ```
+
+# Functions
+**A function call is an expression that tells the CPU to interrupt the current function and execute another function.** <br>
+```
+returnType Identifier {Functio body}
+```
+Our main function should return `0` to indicate that it ran normally, other values mean failure due to error throw. <br>
+
+The C++ standard only defines the meaning of 3 status codes: `0`, `EXIT_SUCCESS`, and `EXIT_FAILURE`. `0` and `EXIT_SUCCESS` both mean the program executed successfully.  <br> EXIT_FAILURE means the program did not execute successfully. <br>
+
+`EXIT_SUCCESS` and `EXIT_FAILURE` are preprocessor macros defined in the <cstdlib> header:
+```
+#include <cstdlib> // for EXIT_SUCCESS and EXIT_FAILURE
+int main(){
+    return EXIT_SUCCESS;
+}
+```
+
+The only exception to the rule that a value-returning function must return a value via a return statement is for function `main()`. The function `main()` will implicitly return the value `0` if no return statement is provided. <br>
+
+## Parameters 
+**A function parameter** is a variable used in the header of a function. Function parameters work almost identically to variables defined inside the function, but with one difference: they are **initialized with a value provided by the caller of the function**. <br>
+```
+int add(int x, int y){  //x and y are function parameters
+    return x + y;
+}
+```
+An **argument** is a value that is passed from the caller to the function when a function call is made:
+```
+doPrint(); // this call has no arguments
+printValue(6); // 6 is the argument passed to function printValue()
+add(2, 3); // 2 and 3 are the arguments passed to function add()
+```
+When a function is called, all of the parameters of the function are created as variables, and the value of each of the arguments is copied into the matching parameter (using **copy initialization ("=")**). <br>
+
+in `add(2,3)` `2` is copied to `x` and `3` is copied to `y` via `x = 2` and `y = 3` <br>
+
+Arguments are the expressions that get resolved before being passes <br>
+```
+add(1, multiply(2, 3)) //here multiply woul dbe resolved first
+```
+## Scope
+Scope is property of an identifier <br>
+
+## Temporary Objects
+```
+int getValueFromUser(){ 	
+	int input{3};	
+	return input; // return the value of input back to the caller
+}
+
+int main(){
+	std::cout << getValueFromUser() << '\n'; // where does the returned value get stored in this called?
+	return 0;
+}
+```
+
+In the code above :
+- `getValueFromUser()` returns the value stored in local variable `input` **back to the caller**
+- caller receives a **copy of the value** so that it has a value it can use even after `input` is destroyed
+- The return value is stored in a **temporary object**. This temporary object is then passed to `std::cout` to be printed
+- Temporary objects have no scope at all (this makes sense, since scope is a property of an identifier, and temporary objects have no identifier) an is destroyed after ```std::cout << getValueFromUser() << '\n'``` executes.
+- In the case where a temporary object is used to initialize a variable, the **initialization happens before the destruction of the temporary**.
+- In modern C++ (especially since C++17) this step is skipped, use the return value of `getValueFromUser()` to directly initialize the parameter of `operator<<`.
+
+## Forward Declaration
+
+ - A forward declaration or a function prototype allows us to tell the compiler about the **existence of an identifier before actually defining the identifier**
+ - This way when compiler encouters a function call, having gone through forward declaration it will understand that we're making a correct function call even if doesn't know where is function defined.
+ - It is helpful in a scenrio where **caller()** and **callee()** are in different file or for functions having **circular dependencies** like below.
+ - In C++ we forward declare the variable/function with its **type and name without its definition**, so that we can use its body. Doing this save **unncessary compilation**.
+
+_Example_
+```
+//someFile.hpp
+class Class;
+void f(Class object);
+```
+
+```
+#include <iostream>
+
+void funcA(); //Function prototype
+void funcB();
+
+int main(){
+    std::cout << "The sum of 3 and 4 is: " << add(3, 4) << '\n'; // this works because we forward declared add() above
+    return 0;
+}
+
+void funcA() { funcB(); };
+void funcB() { funcA(); };
+```
+
+The interdependent functions call can only be solved by forward declration.
+
+## Function without body
+```
+int add(int x, int y); // forward declaration of add()
+
+int main(){
+    std::cout << "The sum of 3 and 4 is: " << add(3, 4) << '\n';
+    return 0;
+}
+```
+In the code above, on compilation it will reach only upto object file creation case but would fail in linking as the **linker would not be able to find the definition of the declaration**. <br>
+
+**One definition rule** : You can forward declare as many times as possible but definition can exist only once
+
+## Calling  Conventions
+
+[source] (https://www.geeksforgeeks.org/calling-conventions-in-c-cpp/) <br>
+
+Generalization :
+```
+return_type calling_convention function_name {
+    // statements
+}
+```
+
+```
+int __cdecl cdeclAdd(int a, int b);
+
+int __stdcall stdcallAdd(int a, int b)  ;
+  
+int __fastcall fastcallAdd(int a, int b, int c, int d);
+  
+class Temp { 
+public: 
+    int __thiscall thiscallAdd(int a, int b) ;
+}; 
+```
+
+Calling convetions decides: <br>
+1. How arguments are passed on stack
+2. Who will clear the stack : caller or callerr ?
+3. What registers will be used and how
+
+**__cdecl**  
+- It is the **default** calling ocnvention
+- **Caller** cleans the stack. i.e. m**ain()::result = cdeclAdd(1, 2);** clears the stack
+- reates larger executables than __stdcall, because it requires each **function call to include stack cleanup code**. (optimiization scope)
+
+**__stdcall**
+- This is a **Microsoft-specific calling convention** used by Win32 API functions
+- Callee cleans the stack.
+
+**__fastcall**
+- Callee cleans the stack
+
+**__thiscall**
+- It is the **default** calling convention used by methods inside a **class**
+- Callee cleans the stack
+- Since we pass **this** pointer as well, we cannot use this calling convention for non-member functions
+
+## Declaration vs Definition
+source is [here](https://www.goldsborough.me/c/c++/linker/2016/03/30/19-34-25-internal_and_external_linkage_in_c++/)
+- **Declaration** tells compiler about existense of a variable/function/symbol and it memory address and required storage may not be defined
+- **Definition** tells the compiler about what the body of the variable/function/symbol contains and how much memory is required to store it
+- In case of reference variables and pointers declarations along with definitions is necessary. In case of pointers they need to have a fixed memory independent of the memory type they are pointing to, in face in deferencing the pointer definition becomes important.
+
+**Functions** <br>
+```
+int f();               // declaration
+int f() { return 42; } // definition
+```
+
+**Variables** <br>
+```
+int x;		//both a declaration and definition
+```
+x in the case above is initialised with 0 via default constructor of int. <br>
+
+**Separating Declaration and Definition for variables** <br>
+```
+extern int x; // declaration
+int x = 42;   // definition
+```
+
+In C++, all definitions are declarations. Conversely, not all declarations are definitions. <br>
+
+A declaration is sufficient to allow the compiler to ensure an identifier is being used properly. For example, when the compiler encounters function call `add(5, 6)`, if it has already seen the declaration for `add(int, int)`, then it can validate that add is actually a function that takes two int parameters. It does not need to have actually seen the definition for function add (which may exist in some other file). <br>
+
+**Contradiction** <br>
+There are a few cases where the compiler must be able to see a full definition in order to use an identifier (such as for template definitions and type definitions.
+
+## One Definition Rule
+
+ - **Within a file**, each function, variable, type, or template can only have one definition. Not applicable to functions defined inside different namespaces. Violating this can cause **redefinition error**
+- **Within a program**, each function or variable can only have one definition. This rule exists because programs can have more than one file. Violating this can cause to show **Linker to issue a redefinition error**
+- Types, templates, **inline** functions, and **inline** variables are allowed to have duplicate definitions in different files, so long as each definition is identical. Violating this will cause **undefined** behavior.
+
+**What can go wrong ?**
+Suppose you have a file.h where you have declared a **_global_ function** and also defined in the same file :
+```
+//file.h
+int add(int, int);
+
+int add (int a  int b) {
+return a + b;
+}
+```
+
+Now, you have included this in different files:
+```
+//A.cpp
+#include <file.h>
+add(3,5);
+
+//B.cpp
+#include <file.h>
+add(5,6);
+
+//C.cpp
+#include <file.h>
+add(6,7);
+```
+
+Since you have declared the function globally, you have exposesd it to the **Linker** and when compiled it will search for its definition and it will **see its definition multiple files** instead of one file and due to this it will through multiple redefinition error.
+
+## Extern "C" and Name Mangling
+[source](https://www.geeksforgeeks.org/extern-c-in-c/)
+
+C++ does name mangling to all the function in order to **add information of the arguments with the function name**. <br>
+```
+int f(void) { return 1; }
+//becomes this
+int __f_v(void) { return 1; }
+```
+
+This technique helps to resolve _function overloading_. <br>
+
+But this can be an issue in case we are trying to use C library inside C++ file as C++ compiler may mangle their function names too and since C doesn't support name mangling the C functions will give error.
+
+For e.g.
+```
+int printf(const char* format, ...); // a C function
+ 
+// Driver Code
+int main()
+{
+    printf("GeeksforGeeks");
+    return 0;
+}
+```
+This wold give error as `printf` is mangled something like `__printf__char`  by C++ and `printf("Geeks...)` isn't able to find `printf` anymore. <br>
+To avoid name mangling of C functions in C++ class we use **extern "C"** .
+```
+// CPP Program to demonstrate Extern "C"
+
+extern "C" {
+int printf(const char* format, ...);
+}
+
+// Driver Code
+int main()
+{
+	printf("GeeksforGeeks");
+	return 0;
+}
+```
+
