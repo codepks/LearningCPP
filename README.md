@@ -856,3 +856,40 @@ int main()
 }
 ```
 
+## Multiple Files
+Remember, compiler compiles each `.cpp` file individually and makes `.o` object files and not '.h` files. <br>
+
+```
+//main.cpp
+#include <iostream>
+
+int add(int x, int y); // needed so main.cpp knows that add() is a function defined elsewhere
+
+int main(){
+    std::cout << "The sum of 3 and 4 is: " << add(3, 4) << '\n';
+    return 0;
+}
+```
+The compiler compiles the file above into `main.o`, sees the function declaration of ```int add(int x, int y);``` and validates it for `add(3,4)` makes the object file. Linker then then searches for the definition for the function symbol ```int add(int x, int y);``` and searches for the definition across the different object files. 
+```
+//add.cpp
+int add(int x, int y) //this is a gloable definition
+{
+    return x + y;
+}
+```
+- Linker finally finds the symbol definition in add.cpp which is a **global definition** and finally links for the object files and this program finally compiles error free to give output `7`.
+- Also, The **same wouldn't work** if you had made the definition in a 'add.h' file and it doesn't get converted in object file and linker wouldn't be able to file it in any object file.
+- Also, don't include `add.cpp` in the `main.cpp` file as linker would find multiple defitions of add() function in `add.o` and `main.o`
+
+**Making the definition local using namespace:** <br>
+We can break the linker from working by making the global definition local by using namespace:
+```
+namespace{
+	int add(int x, int y)
+	{
+		return x + y;
+	}
+}
+```
+Now this function is **no more exposed to linker** and compiler would give linker error issue.
