@@ -933,8 +933,9 @@ return 0;
 ```
 Now defintions wouldn't collide as function defined inside namespace is not exposed to linker directly.
 
-> **Notes : ** <br>
+> **Notes** <br>
 > Two identically named functions can be defined inside separate namespaces, and no naming collision will occur
+> Namespaces are often used to group related identifiers in a large project
 > You can only place declarations and definitions, not executable statements directly
 ```
 namespace MyNamespace {
@@ -948,4 +949,4 @@ namespace MyNamespace {
   x = 5; // This would cause a compiler error
 }
 ```
-> Namespaces are often used to group related identifiers in a large project
+
