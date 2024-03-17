@@ -1406,3 +1406,185 @@ int main()
 3.  use of unsigned numbers is still unavoidable in some cases, mainly those having to do with array indexing
 4.  If you’re developing for an embedded system use of unsigned numbers is more common and accepted for performance reasons.
 
+## Fixed Width Integers
+**Why ?** 
+C opted to intentionally leave the size of an integer open so that the compiler implementers could pick a size for int that performs best on the target computer architecture. <br>
+
+**C99** defined a set of fixed-width integers (in the stdint.h header) that are guaranteed to be the same size on any architecture.
+> E.g. **std::int16_t** with range **-32,768 to 32,767** <br>
+
+They are available under `<cstdint>`<br>
+
+### Downsides
+**First**, Your program will fail to compile on any such architecture that does not support a fixed-width integer that your program is using. However, given that most modern architectures have standardized around 8/16/32/64-bit variables, this is unlikely to be a problem <br>
+
+**Second**, if you use a fixed-width integer, it may be slower than a wider type on some architectures. or example, if you need an integer that is guaranteed to be 32-bits, you might decide to use std::int32_t, but your CPU might actually be faster at processing 64-bit integers.
+
+NOTE : When storing integral values where a specific size is important, it’s generally best to **avoid std::int8_t and std::uint8_t.**
+
+### Best Practice
+1. Prefer int when the size of the integer doesn’t matter
+2. Prefer std::int#_t when storing a quantity that needs a guaranteed range
+3. Prefer std::uint#_t when doing bit manipulation or where well-defined wrap-around behavior is required
+
+### std::size_t
+```
+std::cout << sizeof(int) << '\n';
+```
+The return value of sizeof is an size_t and its capacity is 4 bytes and with this it limits the maximum size of object to be 2^32
+
+## Float type
+- When using floating point literals, always **include at least one decimal place** (even if the decimal is 0). This helps the compiler understand that the number is a floating point number and not an integer
+- Floating point literals default to type double. An f suffix is used to denote a literal of type float
+
+```
+int x{5};      // 5 means integer
+double y{5.0}; // 5.0 is a floating point literal (no suffix means double type by default)
+float z{5.0f}; // 5.0 is a floating point literal, f suffix means float type
+```
+
+ NOTE : A 4 bytes floating type variable has 6-9 singnificant digits. <br>
+
+ ### Override Precision
+ We can override the default precision that std::cout shows by using an output manipulator function named **std::setprecision()**. Output manipulators alter how data is output, and are defined in the iomanip header. <br>
+
+### Best Practice 
+Favor **double over float** unless space is at a premium, as the lack of precision in a float will often lead to inaccuracies.
+
+### Nan and Inf
+- **Inf**, which represents infinity. Inf can be positive or negative
+- **NaN**, which stands for “Not a Number”
+
+```
+double zero {0.0};
+double posinf { 5.0 / zero }; // positive infinity
+std::cout << posinf << '\n';
+
+double neginf { -5.0 / zero }; // negative infinity
+std::cout << neginf << '\n';
+
+double nan { zero / zero }; // not a number (mathematically invalid)
+std::cout << nan << '\n';
+```
+OUTPUT:
+```
+1.#INF
+-1.#INF
+1.#IND
+```
+
+## Boolean Values
+```
+bool isEqual(int x, int y)
+{
+    return x == y; // operator== returns true if x equals y, and false otherwise
+}
+```
+`operator==` is a binary operator that inputs two values, here its `x` and `y` and return bool value.
+
+In boolean value `false` is as `0` is inte
+## Chars
+The char data type was designed to hold a **single character** <br>
+A character can be a single letter('A'), number (1), symbol(#), or whitespace(` `) <br>
+
+- The **integer** stored by a char variable is intepreted as an **ASCII** character
+- Character literals are always placed between **single quotes** (e.g. ‘g’, ‘1’, ‘ ‘)
+- Codes 0-31 are called the unprintable chars
+- Codes 32-127 are called the printable characters
+- This way all the 0-127 value range is utilized in 8 bit character datatype except for negative value range
+
+```
+char ch2{ 'a' }; // initialize with code point for 'a' (stored as integer 97) (preferred)
+char ch{5}; // initialize with integer 5 (stored as integer 5)
+char ch{'5'}; // initialize with code point for '5' (stored as integer 53)
+
+char ch2{ 98 }; // code point for 'b' (not preferred)
+std::cout << ch2; // cout prints a character ('b')
+```
+
+**std::cin is a buffered input** <br>
+```
+std::cout << "Input a keyboard character: "; // assume the user enters "abcd" (without quotes)
+
+char ch{};
+std::cin >> ch; // ch = 'a', "bcd" is left queued.
+std::cout << "You entered: " << ch << '\n';
+
+// Note: The following cin doesn't ask the user for input, it grabs queued input!
+std::cin >> ch; // ch = 'b', "cd" is left queued.
+std::cout << "You entered: " << ch << '\n';
+```
+### Single Quote vs double quotes
+Single chars are always put in **single quotes** to represent one symbol. <br>
+Text between **double quotes** (e.g. “Hello, world!”) is treated as a string of multiple characters <br>
+
+### Unicode
+The most well-known mapping outside of ASCII is the Unicode standard, which maps over 144,000 integers to characters in many different languages. Because Unicode contains so many code points, a single Unicode code point needs 32-bits to represent a character (called UTF-32). However, Unicode characters can also be encoded using multiple 16-bit or 8-bit characters (called UTF-16 and UTF-8 respectively).
+
+### wchar_t, char8_t, char16_t, and char32_t
+**wchar_t** should be avoided in almost all cases (except when interfacing with the Windows API). Its size is implementation defined, and is not reliable. It has largely been deprecated. <br>
+You won’t need to use char8_t, char16_t, or char32_t unless you’re planning on making your program Unicode compatible. <br>
+
+## Type Conversion
+When the compiler does type conversion on our behalf without us explicitly asking, we call this **implicit type conversion** <br>
+
+### Implicit Conversions
+```
+void print(double x){
+	std::cout << x << '\n';
+}
+
+int main(){
+	int y { 5 };
+	print(y); // y is of type int
+}
+```
+**Safe type conversion** : The conversion does not change variable `y` from type int to double. Instead, the conversion uses the value of `y` (5) as input to create a new double value (5.0). This double value is then passed to function print via **direct initilization** .<br>
+**Unsafe TYpe Conversion** :In opposite case of converting 5.5 to 5 i.e double to int might show data loss warning. 
+
+### Explicit Conversions
+The variable itself is not affected by casting its value to a new type <br>
+**For Removing Warning**
+```
+void print(int x){
+	std::cout << x << '\n';
+}
+
+int main(){
+	print( 5.5 ); // explicitly convert double value 5.5 to an int
+	return 0;
+}
+```
+
+The above code will give warning over type conversion from float to int leading to data loss. <br>
+In order to remove the warning and telling the compiler that the conversion is explicit we need to use `static_cast`
+
+```
+print( static_cast<int>(5.5) ); // explicitly convert double value 5.5 to an int
+```
+
+**For static cast character to value**
+
+```
+int main(){
+    char ch{ 97 }; // 97 is ASCII code for 'a'
+    std::cout << ch << " has value " << static_cast<int>(ch) << '\n'; // print value of variable ch as an int
+
+    return 0;
+}
+```
+This outpurs:
+```
+a has value 97
+```
+
+**Converting unsigned numbers to signed numbers**
+```
+unsigned int u { 5 };
+int s { static_cast<int>(u) }; // return value of variable u as an int
+```
+
+But if the input value is out of range for int then it will give undefined behaviour <br>
+
+
+
