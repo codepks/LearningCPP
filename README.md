@@ -1069,3 +1069,34 @@ int main(){
 The above program will print: <br>
 
 **Not printing!**
+
+## Header Files
+
+The primary purpose of a header file is to **propagate declarations** to code (.cpp) files. <br>
+
+
+```
+//add.h:
+int add(int x, int y); // function prototype for add.h -- don't forget the semicolon!
+```
+
+```
+//main.cpp:
+#include "add.h" // Insert contents of add.h at this point.  Note use of double quotes here.
+#include <iostream>
+
+int main(){
+    std::cout << "The sum of 3 and 4 is " << add(3, 4) << '\n';
+    return 0;
+}
+```
+In the code below the compiler still compiles well without adding add.h in add.cpp since it can find definition while linking process. 
+ - By including its own header, add.cpp becomes a **self-sufficient module**. It can be used in other projects without requiring modifications to those projects' header files.
+ - Including the header guarantees that the function's declaration and definition precisely match
+```
+//add.cpp:
+#include "add.h" // Insert contents of add.h at this point.  Note use of double quotes here.
+int add(int x, int y){
+    return x + y;
+}
+```
