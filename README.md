@@ -1588,3 +1588,10 @@ But if the input value is out of range for int then it will give undefined behav
 
 
 
+# Constants and Strings
+
+## Constant Variables
+2 types:
+1. **Named contants** : associated with an identifier. E.g. Constant variables, Constant variables, Enumerated constants 
+2. **Literal constants** : not associated with an identifier
+
