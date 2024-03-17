@@ -1142,3 +1142,78 @@ It can matter if there is a dependency of declrations for e.g. header A dependin
 2. Other headers from your project
 3. 3rd party library headers
 4. Standard library headers
+
+## Header Guards
+
+```
+#ifndef SOME_UNIQUE_NAME_HERE
+#define SOME_UNIQUE_NAME_HERE
+
+// your declarations (and certain types of definitions) here
+
+#endif
+```
+Including header guards in your header file prevents your code from having mulitple copies of definitions / declarations(although multiple declarations is allowed) / **classes** etc. <br>
+
+It is always good to have unique header guard names to avoid conflict of same name header file in a large project.
+
+## pragma once
+It serves the same purpose as header guards but complex cases header guards is still preferable over pragma once and it is followed by Google too.<br>
+#pragma once is **not defined by the C++ standard**, it is possible that some compilers may not implement it.
+
+## Design your first Program
+1. Design step 1: Define your goal
+2. Design step 2: Define requirements
+3. Design step 3: Define your tools, targets, and backup plan
+4. Design step 4: Break hard problems down into easy problems
+5. Design step 5: Figure out the sequence of events
+
+### Implementation
+1. Outline your cod ein main function
+```
+int main()
+{
+//    doBedroomThings();
+//    doBathroomThings();
+//    doBreakfastThings();
+//    doTransportationThings();
+
+    return 0;
+}
+```
+
+2. Implement each function
+```
+#include <iostream>
+
+// Full implementation of the getUserInput function
+int getUserInput()
+{
+    std::cout << "Enter an integer: ";
+    int input{};
+    std::cin >> input;
+
+    return input;
+}
+
+int main()
+{
+    // Get first number from user
+    int value{ getUserInput() }; // Note we've included code here to test the return value!
+    std::cout << value << '\n'; // debug code to ensure getUserInput() is working, we'll remove this later
+
+    // Get mathematical operation from user
+//    getMathematicalOperation();
+
+    // Get second number from user
+//    getUserInput();
+
+    // Calculate result
+//    calculateResult();
+
+    // Print result
+//    printResult();
+
+    return 0;
+}
+```
