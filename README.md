@@ -1090,9 +1090,7 @@ int main(){
     return 0;
 }
 ```
-In the code below the compiler still compiles well without adding add.h in add.cpp since it can find definition while linking process. 
- - By including its own header, add.cpp becomes a **self-sufficient module**. It can be used in other projects without requiring modifications to those projects' header files.
- - Including the header guarantees that the function's declaration and definition precisely match
+
 ```
 //add.cpp:
 #include "add.h" // Insert contents of add.h at this point.  Note use of double quotes here.
@@ -1100,3 +1098,47 @@ int add(int x, int y){
     return x + y;
 }
 ```
+In the code above the compiler still compiles well without adding add.h in add.cpp since it can find definition while linking process. 
+ - By including its own header, add.cpp becomes a **self-sufficient module**. It can be used in other projects without requiring modifications to those projects' header files.
+ - Including the header guarantees that the function's declaration and definition precisely match
+
+```
+// something.h:
+int something(int); // return type of forward declaration is int
+```
+```
+//something.cpp:
+#include "something.h"
+void something(int) // error: wrong return type
+{
+}
+```
+
+Including something.h in something.cpp would help to check if the declarations and definitions are matching or not and this we can get verified while compiling the individual source file something.cpp itself insted of jumping to compiling whole source code.
+
+### Other Dir headers
+The below given code shows bad practice to include headers in your file, know as **relative path to the header file**  :
+```
+#include "headers/myHeader.h"
+#include "../moreHeaders/myOtherHeader.h"
+```
+
+Downsides to it <br>
+1.  It requires you to reflect your directory structure in your code
+2.  If you ever update your directory structure, your code won’t work anymore
+
+**Better Method** <br>
+A better method is to tell your compiler or IDE that you have a bunch of header files in some other location, so that it will look there when it can’t find them in the current directory. E.g. **Include Directories** in Visual Studio
+
+### Include necessary headers
+The best practice says that if your file requires a header <someheader> but that is already included by some other header <otherheader> which already includes <someheader> and you feel no need to include the <someheader> explicitly then you should't do so. <br>
+If something goes wrong with <otherheader> then you would lose <someheader> as well, that's why you should explicity include <someheader> file too if it is required.
+
+### Order of headers
+It can matter if there is a dependency of declrations for e.g. header A depending on header B, then B shuold be included first then A.
+
+**Best Practice** 
+1. The paired header file
+2. Other headers from your project
+3. 3rd party library headers
+4. Standard library headers
