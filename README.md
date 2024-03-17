@@ -893,3 +893,59 @@ namespace{
 }
 ```
 Now this function is **no more exposed to linker** and compiler would give linker error issue.
+
+## Namespaces
+
+### Name Collision
+```
+//a.cpp:
+#include <iostream>
+void myFcn(int x){
+    std::cout << x;
+}
+```
+```
+//main.cpp:
+#include <iostream>
+void myFcn(int x){
+    std::cout << 2 * x;
+}
+int main() {
+ return 0;
+}
+```
+On compiling the code above, each individual file would compile properly but when it would come to Linker it would find duplication of defition of myFcn() (defition is also declration).
+
+### Namespaces
+
+The solution to above code is putting namespace to either of the definition to make the definition local to the file and then that defitniion can be accessed via namespace scope resolution. 
+```
+//main.cpp:
+#include <iostream>
+namespace SomeSpace{ void myFcn(int x){
+    std::cout << 2 * x;
+}
+}
+int main() {
+SomeSpace::myFcn(3);
+return 0;
+}
+```
+Now defintions wouldn't collide as function defined inside namespace is not exposed to linker directly.
+
+> **Notes : ** <br>
+> Two identically named functions can be defined inside separate namespaces, and no naming collision will occur
+> You can only place declarations and definitions, not executable statements directly
+```
+namespace MyNamespace {
+  // OK: Variable declaration
+  int myVariable;
+
+  // OK: Function declaration
+  void myFunction();
+
+  // NOT OK: Executable statement directly within namespace
+  x = 5; // This would cause a compiler error
+}
+```
+> Namespaces are often used to group related identifiers in a large project
