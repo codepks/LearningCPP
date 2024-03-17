@@ -1217,3 +1217,72 @@ int main()
     return 0;
 }
 ```
+
+# Debugging
+
+- First step is th reproduce the problem
+- Comment your code
+- OR Validate your code flow/do a DRY run
+- Print the values
+- Use `std:cerr` over `std::cout` as cout is more bufferred and cerr is not as it imidiately outputs the value. Cout may or may not show output in case of crash but `cerr` does. On the other hand, `std::cerr` is unbuffered, which means anything you send to it will output immediately
+
+## Advance debugging
+
+### Conditional Compilation
+```
+#include <iostream>
+
+#define ENABLE_DEBUG // comment out to disable debugging
+
+int getUserInput()
+{
+#ifdef ENABLE_DEBUG
+std::cerr << "getUserInput() called\n";
+#endif
+	std::cout << "Enter a number: ";
+	int x{};
+	std::cin >> x;
+	return x;
+}
+
+int main()
+{
+#ifdef ENABLE_DEBUG
+std::cerr << "main() called\n";
+#endif
+    int x{ getUserInput() };
+    std::cout << "You entered: " << x << '\n';
+
+    return 0;
+}
+```
+- If this were a multi-file program, the `#define ENABLE_DEBUG` would go in a header file that’s included into all code files so we can comment / uncomment the #define in a single location and have it propagate to all code files.
+- Another downside of this approach is that if you make a typo (e.g. misspell “DEBUG”) or forget to include the header into a code file, some or all of the debugging for that file may not be enabled. `
+
+## Logger
+One can use one of the many existing third-party logging tools available
+
+```
+#include <plog/Log.h> // Step 1: include the logger headers
+#include <plog/Initializers/RollingFileInitializer.h>
+#include <iostream>
+
+int getUserInput(){
+	PLOGD << "getUserInput() called"; // PLOGD is defined by the plog library
+
+	std::cout << "Enter a number: ";
+	int x{};
+	std::cin >> x;
+	return x;
+}
+
+int main(){
+	plog::init(plog::debug, "Logfile.txt"); // Step 2: initialize the logger
+	PLOGD << "main() called"; // Step 3: Output to the log as if you were writing to the console
+	int x{ getUserInput() };
+	std::cout << "You entered: " << x << '\n';
+
+	return 0;
+}
+```
+
