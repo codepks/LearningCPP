@@ -1286,3 +1286,123 @@ int main(){
 }
 ```
 
+# Fundamental Data Types
+
+## Introduction
+- Bit is a smallest unit of a data
+- In modern computer architectures, each bit does not get its own unique memory address.Instead they are stored in chunks of data and collective bits or int + bits can have unique memory address, it is **1 byte of chunk** in C++ 
+- Many of the types defined in newer versions of C++ (e.g. std::nullptr_t) use a **_t suffix**. This suffix means “**type**”
+
+## Void
+
+- It means no datatype
+- The compiler knows about the existence of such types, but **does not have enough information to determine how much memory to allocate** for objects of that type
+- `void` is intentionally incomplete since it represents the lack of a type, and thus cannot be defined
+
+```
+void value; // won't work, variables can't be defined with incomplete type void
+```
+
+**Usage** <br>
+- `void` is used to indicate that a function does not return a value
+- In C, void is used as a way to indicate that a function does not take any parameters
+```
+int getValue(void) // void here means no parameters
+{
+    int x{};
+    std::cin >> x;
+
+    return x;
+}
+```
+- Void has more advance usage in form of **void pointers**
+
+## size of objects
+The sizeof operator is a unary operator that **takes either a type or a variable**, and returns its size in bytes <br>
+NOTE : **sizeof** does not include dynamically allocated memory used by an object.
+
+## signed integers
+- In binary representation, **a single bit** (called the sign bit) is used to store the sign of the number
+- The **non-sign bits** (called the magnitude bits) determine the magnitude of the number
+
+### Range
+- 8-bit integer contains 8 bits. 28 is 256, so an 8-bit integer can hold **256** possible values. There are 256 possible **values between -128 to 127**
+- Out of 8 bits 1 bit is used to store the sign and rest 7 bits are used to store the magnitude
+- Assigning value more than range can lead to **overflow** and undefined behaviour
+
+Overflow case :
+```
+#include <iostream>
+
+int main()
+{
+    // assume 4 byte integers
+    int x { 2'147'483'647 }; // the maximum value of a 4-byte signed integer
+    std::cout << x << '\n';
+
+    x = x + 1; // integer overflow, undefined behavior
+    std::cout << x << '\n';
+
+    return 0;
+}
+```
+output is 
+```
+2147483647
+-2147483648
+```
+### Division
+When doing division with two integers (called integer division), C++ always produces an integer result
+
+## Unsigned Integers
+Unsigned integers are integers that can only hold non-negative whole numbers. <br>
+
+### Overflow
+**If an unsigned value is out of range, it is divided by one greater than the largest number of the type, and only the remainder kept.** <br>
+
+E.g. The number 280 is too big to fit in our 1-byte range of 0 to 255. 1 greater than the largest number of the type is 256. Therefore, we **divide 280 by 256, getting 1 remainder 24**. The remainder of 24 is what is stored. <br>
+
+Any number bigger than the largest number representable by the type simply “**wraps around**” (sometimes called “modulo wrapping”) <br>
+
+**Positive Wrapping**
+If +ve value of greater than range is added then it gets truncated
+
+**Negative Wrapping**
+If -ve value is entered against the unsigned number **it wraps around to the top of the range**. <br>
+E.g. In a 2-byte unsigned integer, -1 is not representable, so it wraps around to the top of the range, producing the value 65535. -2 wraps around to 65534. 
+
+### Avoiding Unsigned Integers
+1. It can easily introduce overflow in case of **subtraction** and **loops** having continous decrement
+```
+int main(){
+	unsigned int x{ 2 };
+	unsigned int y{ 3 };
+
+	std::cout << x - y << '\n'; // prints 4294967295 (incorrect!)
+
+	return 0;
+}
+```
+```
+Output : 4294967295 <br>
+```
+
+2. In C++, if a mathematical operation (e.g. arithmetic or comparison) has one signed integer and one unsigned integer, the **signed integer will usually be converted to an unsigned integer**
+```
+int main()
+{
+	unsigned int u{ 2 };
+	signed int s{ 3 };
+
+	std::cout << u - s << '\n'; // 2 - 3 = 4294967295
+
+	return 0;
+}
+```
+
+### When to use?
+1.  unsigned numbers are preferred when dealing with **bit manipulation**
+2.  useful in some algorithms like encryption and random number generation
+3.  use of unsigned numbers is still unavoidable in some cases, mainly those having to do with array indexing
+4.  If you’re developing for an embedded system use of unsigned numbers is more common and accepted for performance reasons.
+
