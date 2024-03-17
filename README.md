@@ -934,9 +934,9 @@ return 0;
 Now defintions wouldn't collide as function defined inside namespace is not exposed to linker directly.
 
 > **Notes** <br>
-> Two identically named functions can be defined inside separate namespaces, and no naming collision will occur
-> Namespaces are often used to group related identifiers in a large project
-> You can only place declarations and definitions, not executable statements directly
+> Two identically named functions can be defined inside separate namespaces, and no naming collision will occur <br>
+> Namespaces are often used to group related identifiers in a large project <br>
+> You can only place declarations and definitions, not executable statements directly <br>
 ```
 namespace MyNamespace {
   // OK: Variable declaration
@@ -950,3 +950,122 @@ namespace MyNamespace {
 }
 ```
 
+### Global Namespace
+
+```
+//a.cpp:
+#include <iostream>
+void myFcn(int x){
+    std::cout << x;
+}
+```
+
+Here myFcn() is defined inside a global namespace. <br>
+
+- Identifiers declared inside the global scope are in scope from the point of declaration to the end of the file.
+
+### std namspace
+- When you use an identifier that is defined inside a namespace (such as the std namespace), you have to tell the compiler that the identifier lives inside the namespace
+- Use explicit namespace prefixes to access identifiers defined in a namespace.
+
+```
+#include <iostream> // imports the declaration of std::cout into the global scope
+using namespace std; // makes std::cout accessible as "cout"
+int cout() { // defines our own "cout" function in the global namespace
+    return 5;
+}
+
+int main(){
+    cout << "Hello, world!"; // Compile error!  Which cout do we want here?  The one in the std namespace or the one we defined above?
+
+    return 0;
+}
+```
+
+The above code shows compiler here as cout defitnition is ambigous.
+
+## Preprocessor
+- Every code goes through preprocessing phase before compilation
+- After preprocessing a file is called a **translation unit**
+
+### Preprocessor Directives
+- They are instructions that start with **#** and end with **newline**
+- Preprosessor doesn't understand C++ syntax as it has its **own syntax**
+
+### Macros
+There are two types:
+- Object-like macros - ``` #define DEBUG "debug" ```
+- funtion-like macros - ```#define AREA(length, width) (length * width)```
+
+
+They are more often seen in legacy code and have been replace with constant variables etc.
+
+### Conditional Compilation
+
+**#ifdef (#if defined() ), #ifndef (#if !defined()), and #endif** <br>
+- The #ifdef preprocessor directive allows the preprocessor to check whether an identifier has been previously **#defined**. If so, the code between the #ifdef and matching #endif is compiled. If not, the code is ignored.
+- #ifndef is the opposite of #ifdef, in that it allows you to check whether an identifier has NOT been #defined yet.
+
+```
+#define PRINT_JOE
+int main(){
+#ifdef PRINT_JOE
+    std::cout << "Joe\n"; // will be compiled since PRINT_JOE is defined
+#endif
+
+#ifdef PRINT_BOB
+    std::cout << "Bob\n"; // will be excluded since PRINT_BOB is not defined
+#endif
+   return 0;
+}
+```
+Only defined directive code will be compiled and others would be ignored
+
+### #if 0
+It can be used in a code to void from being compiled and it behave as if it is **inside a comment block**.
+
+### Scope
+
+```
+void foo(){
+#define MY_NAME "Alex"
+}
+
+int main(){
+	std::cout << "My name is: " << MY_NAME << '\n';
+	return 0;
+}
+```
+
+- Preprocessor  doesn’t understand C++ concepts like functions.Therefore, this program behaves identically to one where #define MY_NAME “Alex” was defined either before or immediately after function foo()
+- Directives are only valid from the point of definition to the end of the file in which they are defined. Directives defined in one code file do not have impact on other code files in the same project.
+
+
+```
+// function.cpp
+void doSomething()
+{
+#ifdef PRINT
+    std::cout << "Printing!\n";
+#endif
+#ifndef PRINT
+    std::cout << "Not printing!\n";
+#endif
+}
+```
+
+```
+// main.cpp
+void doSomething(); // forward declaration for function doSomething()
+
+#define PRINT
+
+int main(){
+    doSomething();
+    return 0;
+}
+```
+
+The above program will print: <br>
+
+**Not printing!**
