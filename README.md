@@ -1801,3 +1801,34 @@ Due to variable removal in optimization, the variables are often skipped while d
 But debugger these days have optimizations turned off.
 
 ## Constexpr Variables
+In some cases it is difficult to to gues for a compiler if the expression is a run time or compiler time constant:
+```
+const int d { obj };        // not obvious whether this is a runtime or compile-time const
+const int e { getValue() }; // not obvious whether this is a runtime or compile-time const
+```
+
+In order to help with this, we utilize compilers power to hint us with constant expression by using **constexpr keyword**. <br>
+
+A constexpr keyword **must** always be initilized with constant expression. These statements would be evaluated at compile time<br>
+```
+constexpr double gravity { 9.8 }; // ok: 9.8 is a constant expression
+constexpr int sum { 4 + 5 };      // ok: 4 + 5 is a constant expression
+constexpr int something { sum };  // ok: sum is a constant expression
+```
+Where is doesn't work:
+Example 1 :
+```
+int age{};
+std::cin >> age;
+constexpr int myAge { age };      // compile error: age is not a constant expression
+```
+Example 2:
+```
+int five(){  return 5;}
+constexpr int f { five() };       // compile error: return value of five() is not a constant
+```
+This will not work as five() is not a constant. To resolve this we need to make five() constexpr too.
+```
+constexpr int five(){  return 5;}
+constexpr int f { five() };       // compile error: return value of five() is not a constant
+```
