@@ -1726,3 +1726,71 @@ C++ onwards std::format is also used:
 std::cout << std::format("{:b}\n", 0b1010);  // C++20
 ```
 
+## Constant Expressions
+The **as-if** rule says that the compiler can modify a program however it likes in order to produce more optimized code, so long as those modifications do not affect a program’s “observable behavior” <br>
+
+### Compile Time Evaluation
+```
+int x { 3 + 4 };
+std::cout << x << '\n';
+```
+
+In the code above,  if not optimized compiler would have to **generate an executable that calculates** the result of `3 + 4`, if theis calculation is performed million times then it would lead to resource waster. <br>
+To avoid this the compiler optimizes the `3+4` expression at the compile time itself and save the run time resource wastage. 
+```
+int x {7};
+std::cout << x << '\n';
+```
+Although, this might make the compile time longer. These opimizations are one of the strong features of modern C++. 
+
+### Constant Expressions
+
+A constant expression contains on **compile time constants** and  **operators/functions** that support compile time evaluation. <br>
+
+Examples of Compile time constants
+1. Literals (e.g. ‘5’, ‘1.2’)
+2. Constexpr variables
+3. Const integral variables `const int x { 5 }`. We don't include **runtime constants** here : **const int x{value}**
+5. Non-type template parameters
+6. Enumerators 
+
+**NOTE**: If you need runtime constant variables to be compile-time constants, define them as _constexpr variables_ instead. <br>
+
+### Compile time vs run time const
+**Compile Time constant**
+```
+const int c { 5 };           // 5 is a constant expression
+const int d { c };           // c is a constant expression
+const long e { c + 2 };      // c + 2 is a constant expression
+```
+Constant expressions **are always eligible for compile-time evaluation**, meaning they are more likely to be optimized at compile-time.
+<br>
+**Run time constant** <br>
+```
+int a { 5 };                 // 5 is a constant expression
+double b { 1.2 + 3.4 };      // 1.2 + 3.4 is a constant expression
+
+const int f { a };           // a is not a constant expression
+const int g { a + 1 };       // a + 1 is not a constant expression
+const long h { a + c };      // a + c is not a constant expression
+const int i { getNumber() }; // getNumber() is not a constant expression
+```
+These may or may not have compile time optimization. <br>
+
+**Runtime constant optimization** <br>
+```
+int x { 7 };            // x is non-const
+std::cout << x << '\n'; // x is a non-constant subexpression
+```
+
+A smart compiler might realize that `x` will always evaluate to `7` in this particular program and it will optimize this under as-if rule. So it will remove x variable completely and replace next line `x` with `7`.
+
+```
+std::cout << 7 << '\n';
+```
+
+Had it been ```const int x {7}```, the compiler would have optmized it anyway.
+
+### Debugging Issue
+Due to variable removal in optimization, the variables are often skipped while debugging. <br>
+But debugger these days have optimizations turned off.
