@@ -1886,7 +1886,9 @@ inline int min(int x, int y) // inline keyword means this function is an inline 
 ### Modern C++ Compilers
 Modern C++ compilers are smart enough to decide if inline expansion would reduce function overhead or not by doing **inline expansion** and it is done automatically, thereby inline keyword is no longer used in modern C++. <br>
 
-Most of the functions fall into inline expansion and only some don't.
+You would hardly see any difference in the instrctions set (tried in godbolt.org) for min(x,y) with and without inline.<br>
+
+Most of the functions fall into inline expansion and only some don't. 
 **Judging** <br>
 If the body of the function being expanded takes more instructions than the function call being replaced, then each inline expansion will cause the executable to grow larger. Larger executables tend to be slower.
 
@@ -1948,5 +1950,31 @@ double circumference(double radius){
 
 3. They should generally be used in  **header-only libraries** <br>
 
+**Why not make all functions inline and defined in a header file?**
+Inline functions allow definitions in header file, if we do so for all the functions, then changes in the any of the function defition would need all the source file to be recompile which are including that header file.
 
 
+## Constexpr functions
+```
+int greater(int x, int y){
+    return (x > y ? x : y); // here's our expression
+}
+
+int main(){
+    constexpr int x{ 5 };
+    constexpr int y{ 6 };
+    std::cout << greater(x, y) << " is greater!\n"; // will be evaluated at runtime
+
+    return 0;
+}
+```
+
+In the above code, despite the x and y being constexprm the function greater (x,y) becomes run time constant. <br>
+In order to make it compile time constant, we need to make it constexpr too. <br>
+
+```
+constexpr int greater(int x, int y){
+    return (x > y ? x : y); // here's our expression
+}
+```
+NOTE : To be **eligible** for compile-time evaluation, a function must have a constexpr return type.
