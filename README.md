@@ -1595,6 +1595,7 @@ But if the input value is out of range for int then it will give undefined behav
 1. **Named contants** : associated with an identifier. E.g. Constant variables, Constant variables, Enumerated constants 
 2. **Literal constants** : not associated with an identifier
 
+## Named Constants
 It is preferred to have constant **before type**: 
 ```
 const double gravity { 9.8 };  // preferred use of const before type
@@ -1605,4 +1606,123 @@ Const variables **must** always be **initialized** :
 ```
 const double gravity; // error: const variables must be initialized
 gravity = 9.9;        // error: const variables can not be changed
+int age{5};
+const int constAge {  age }; //They can be initilized with non-const variables
 ```
+### Constant Function Parameters
+Making a function parameter constant enlists the compiler’s help to ensure that the parameter’s value is not changed inside the function.
+```
+void printInt(const int x){
+    std::cout << x << '\n';
+}
+```
+```
+printInt(5); // 5 will be used as the initializer for x
+```
+NOTE : **Don’t use const when passing by value.** Anyway the constant variable would be destroyed and there is not point if passed by value and we have made it a constant. _const is preferred in pass by reference generally_
+
+### Cost return values
+```
+const int getValue(){
+    return 5;			// we are returning by value over here
+}
+```
+For **fundamental types**, the const qualifier on a return type is simply ignored (your compiler may generate a warning). <br>
+For other types, **return by value for constant variables is not a good practice** and it can interfere with compiler's optimization(**move semantics**) for non-const return by value. <br>
+
+### contant variables over macros
+- Macros cannot be scoped unlike constants as it is handled separately by preprocessor
+- They don't have C++ syntax so it is difficult to debug them and it is difficult to inspect their value
+```
+void someFcn() {
+// Even though gravity is defined inside this function
+// the preprocessor will replace all subsequent occurrences of gravity in the rest of the file
+#define gravity 9.8
+}
+
+void printGravity(double gravity) { // including this one, causing a compilation error
+    std::cout << "gravity: " << gravity << '\n';
+}
+```
+Use:
+```
+const int MAX_VALUE = 100;
+```
+
+## Multifile code
+We declare them once in a central location and use them wherever needed. That way, if you ever need to change them, you only need to change them in one place. <br>
+This can be well facilitate using **inline variables**.
+
+## Literal contants
+Literals are values that are **inserted directly into the code.** <br>
+```
+return 5;                     // 5 is an integer literal
+bool myNameIsAlex { true };   // true is a boolean literal
+double d { 3.4 };             // 3.4 is a double literal
+std::cout << "Hello, world!"; // "Hello, world!" is a C-style string literal
+```
+
+### Literal suffixes
+one can have literal suffixes like `f` to suggest the type of literal. `f` is used for a floating value. <br>
+It is often used for **type deduction** too using auto keyword. <br>
+
+This may cause warning <br>
+```
+float f { 4.1 }; // warning: 4.1 is a double literal, not a float literal
+float f {4.1f} 	 //this works
+```
+
+### String Literals
+- They are not fundamental to C++ and have a strange and complicated type that is hard to work with
+- For this reasons they are known as **C-Style** strings
+- They have null termination `'\0'`
+- "Hello" has type `const char[6]` and not `const char[5]` due to null terminator
+
+C-style string literals are const objects that are created at the start of the program and are guaranteed to **exist for the entirety of the program**.
+
+## Numeral Systems
+There are **4 main numeral systems** available in C++. In order of popularity, these are: 
+1. decimal (base 10)
+2. binary (base 2)
+3. hexadecimal (base 16)
+4. octal (base 8).
+
+### Hexadecimal Literals
+```
+int x{ 0xF }; // 0x before the number means this is hexadecimal
+```
+**Binary Repesentation**
+Because there are 16 different values for a hexadecimal digit, we can say that a **single hexadecimal digit encompasses 4 bits**. <br> **(00) is a byte**
+```
+32-bit integer : 0011 1010 0111 1111 1001 1000 0010 0110
+hex value : 3A7F 9826
+```
+
+It is often used to represent memory addresses.
+
+## Binary Literals 
+```
+bin = 0x0001; //before C++14
+bin = 0b1;   //after C++14
+```
+
+### Digit separators
+```
+int bin { 0b1011'0010 };
+long value { 2'132'673'462 };
+```
+separator can not occur before the first digit of the value:
+```
+int bin { 0b'1011'0010 };  // error: ' used before first digit of value
+```
+
+### Bitset
+Doing output of binary literal in `std::cout`  a little difficult, we can use `biset` to store those literals and then output them:
+```
+std::bitset<8> bin1{ 0b1100'0101 };
+```
+C++ onwards std::format is also used:
+```
+std::cout << std::format("{:b}\n", 0b1010);  // C++20
+```
+
