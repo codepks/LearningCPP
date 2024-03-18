@@ -1977,4 +1977,20 @@ constexpr int greater(int x, int y){
     return (x > y ? x : y); // here's our expression
 }
 ```
-NOTE : To be **eligible** for compile-time evaluation, a function must have a constexpr return type.
+NOTE : To be **eligible** for compile-time evaluation, a **function must have a constexpr return type**.
+
+**Run-time Evaluation** <br>
+```
+constexpr int greater(int x, int y){
+    return (x > y ? x : y);
+}
+
+int main(){
+    int x{ 5 }; // not constexpr
+    int y{ 6 }; // not constexpr
+
+    std::cout << greater(x, y) << " is greater!\n"; // will be evaluated at runtime
+
+    return 0;
+}
+```
