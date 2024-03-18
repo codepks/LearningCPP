@@ -1979,7 +1979,7 @@ constexpr int greater(int x, int y){
 ```
 NOTE : To be **eligible** for compile-time evaluation, a **function must have a constexpr return type**.
 
-**Run-time Evaluation** <br>
+### Run-time Evaluation
 ```
 constexpr int greater(int x, int y){
     return (x > y ? x : y);
@@ -1993,4 +1993,174 @@ int main(){
 
     return 0;
 }
+```
+
+In the above case, x and y are not const expressions yet we have kept greater() to be constexpr to make it available for constexpr variables too.
+
+### Other non-eligible cases
+```
+constexpr int g { greater(5, 6) };              // case 1: always evaluated at compile-time
+std::cout << g << " is greater!\n";
+
+std::cout << greater(5, 6) << " is greater!\n"; // case 2: may be evaluated at either runtime or compile-time
+
+int x{ 5 }; // not constexpr but value is known at compile-time
+std::cout << greater(x, 6) << " is greater!\n"; // case 3: likely evaluated at runtime
+
+std::cin >> x;
+std::cout << greater(x, 6) << " is greater!\n"; // case 4: always evaluated at runtime
+```
+Thus, a constexpr function is better thought of as “**can be used in a constant expression**”, not “**will be evaluated at compile-time**”.
+
+NOTE: Dependent constexpr functions should also evaluate at compile time.
+
+### Forcing constexpr evaluation
+The most common way to do this is to use the return value to initialize a constexpr variable.
+
+
+## Consteval
+In c++ 20 we have consteval which makes a function do compile time evaluation only, else it will show errors on it.
+```
+constexpr int g { greater(5, 6) };              // ok: will evaluate at compile-time
+std::cout << g << '\n';
+
+std::cout << greater(5, 6) << " is greater!\n"; // ok: will evaluate at compile-time
+
+int x{ 5 }; // not constexpr
+std::cout << greater(x, 6) << " is greater!\n"; // error: consteval functions must evaluate at compile-time
+```
+
+But issue with consteval is that unlike constexpr it is not open for run-time evaluation<br>
+In order to do so, we have a a trick to make constexpr do consteval do partly and consteval partly:
+
+```
+consteval auto compileTime(auto value){
+    return value;
+}
+
+constexpr int greater(int x, int y) // function is constexpr{
+    return (x > y ? x : y);
+}
+
+int main(){
+    std::cout << greater(5, 6) << '\n';              // may or may not execute at compile-time
+    std::cout << compileTime(greater(5, 6)) << '\n'; // will execute at compile-time
+}
+```
+
+## Implcit Inlining
+Because constexpr functions may be evaluated at compile-time, the compiler must be able to see the full definition of the constexpr function at all points where the function is called. A forward declaration will not suffice, even if the actual **function definition appears** later in the same compilation unit. <br>
+
+constexpr functions are often defined in **header files**, so they can be #included into any .cpp file that requires the full definition. <br>
+
+To avoid such problems, constexpr and consteval functions **are implicitly inline**, which makes them exempt from the one-definition rule.
+
+### Disadvantages of constexpr
+1. They are difficult to debug as they cannot be inspected on runtime
+
+
+## std::string
+
+Keypoints:
+- you can’t use assignment to assign a C-style string variable a new value
+- if you copy a larger C-style string into the space allocated for a shorter C-style string, undefined behavior will result
+- In modern C++, C-style string variables are best avoided
+- String characters are **null-terminated**
+
+std::string is not a fundamental data type, rather a class type.
+
+### std::getline()
+```
+std::string name{};
+std::getline(std::cin >> std::ws, name);
+```
+
+### string length
+Two ways :
+```
+std::cout << name << " has " << name.length() << " characters\n";
+std::cout << name << " has " << std::ssize(name) << " characters\n"; // C++ 20
+```
+
+### Disadvantages
+1. Initializing a std::string is expensive : As you have to initilize character by character
+2. Do not pass std::string by value : Again character by charater copying to initilize is done here making expensive operation
+
+Exception in **return by value** <br>
+In these cases of return by value you would give compiler oppurtunity to do **optimization via move semantics**.
+1. A local variable of type std::string
+```
+std::string createString() {
+    std::string message = "Hello, world!";
+    return message;
+}
+```
+2. A std::string that has been returned by value from a function call or operator
+```
+std::string concatenate(const std::string& str1, const std::string& str2) {
+    return str1 + str2;
+}
+```
+3. A std::string that is created as part of the return statement
+```
+std::string getMessage() {
+    return "Hello, world!";
+}
+```
+4. Returning by **const reference**
+```
+const std::string& getGreeting() {
+    static std::string greeting = "Hello, world!";
+    return greeting;
+}
+```
+
+**HOW ?** <br>
+`std::string` supports a capability called **move semantics**, which allows an **object that will be destroyed at the end of the function** to instead be returned by value without making a copy. <br>
+
+**BEST PRACTICE**<br>
+If returning a C-style string literal, use a `std::string_view` return type instead. <br>
+
+## constexpr for strings
+```
+ constexpr std::string name{ "Alex"s }; // compile error
+```
+It is not supported
+
+## std::string_view
+### std::string disadvantages
+```
+void printString(std::string str) // str makes a copy of its initializer{
+    std::cout << str << '\n';
+}
+std::string s{ "Hello, world!" }; // s makes a copy of its initializer
+printString(s);
+```
+
+Lots of needless copying happening above for strings and expensive operation <br>
+
+### std::string property
+std::string_view provides **read-only access** to an existing string. <br>
+```
+void printString(std::string_view str) // str makes a copy of its initializer{
+    std::cout << str << '\n';
+}
+std::string_view s{ "Hello, world!" }; // s makes a copy of its initializer
+printString(s);
+```
+In the code above:
+1. `s` has a read only access to to `"Hello, World!"` string without making copy initilization
+2. similarly, `str` in `printString()` also has read access to `"Hello, World!"` without making copy
+
+ std::string_view parameter will accept arguments of type `C-style string`, a `std::string`, or `std::string_view`
+
+ ### string_view to string
+ 1. We can directly inialize string with string_view  : `std::string s{ sv };`
+ 2. cast string_view to string : `static_cast<std::string>(sv)`
+
+### string_view and constexpr
+Contrary to support with std::string(due to dunamic allocation), std::string_view has full support of constexpr
+```
+constexpr std::string_view s{ "Hello, world!" }; // s is a string symbolic constant
+std::cout << s << '\n'; // s will be replaced with "Hello, world!" at compile-time
 ```
