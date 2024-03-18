@@ -1595,3 +1595,14 @@ But if the input value is out of range for int then it will give undefined behav
 1. **Named contants** : associated with an identifier. E.g. Constant variables, Constant variables, Enumerated constants 
 2. **Literal constants** : not associated with an identifier
 
+It is preferred to have constant **before type**: 
+```
+const double gravity { 9.8 };  // preferred use of const before type
+int const sidesInSquare { 4 }; // "east const" style, okay but not preferred
+```
+
+Const variables **must** always be **initialized** :
+```
+const double gravity; // error: const variables must be initialized
+gravity = 9.9;        // error: const variables can not be changed
+```
