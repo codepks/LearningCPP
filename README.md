@@ -1777,6 +1777,8 @@ const int i { getNumber() }; // getNumber() is not a constant expression
 ```
 These may or may not have compile time optimization. <br>
 
+NOTE: const Function parameters are also runtime-constants.
+
 **Runtime constant optimization** <br>
 ```
 int x { 7 };            // x is non-const
@@ -1815,14 +1817,14 @@ constexpr double gravity { 9.8 }; // ok: 9.8 is a constant expression
 constexpr int sum { 4 + 5 };      // ok: 4 + 5 is a constant expression
 constexpr int something { sum };  // ok: sum is a constant expression
 ```
-Where is doesn't work:
-Example 1 :
+Where is doesn't work ?<br>
+**Example 1:**
 ```
 int age{};
 std::cin >> age;
 constexpr int myAge { age };      // compile error: age is not a constant expression
 ```
-Example 2:
+**Example 2:**
 ```
 int five(){  return 5;}
 constexpr int f { five() };       // compile error: return value of five() is not a constant
@@ -1832,3 +1834,119 @@ This will not work as five() is not a constant. To resolve this we need to make 
 constexpr int five(){  return 5;}
 constexpr int f { five() };       // compile error: return value of five() is not a constant
 ```
+
+## Const vs constexpr
+
+For variables, 
+- **const** means that the value of an object **cannot be changed** after initialization. 
+- **constexpr** means that an object must have a value that is **known at compile-time**.
+
+Constexpr variables are implicitly const. Const variables are not implicitly constexpr. <br>
+**constexpr is not valid** for dynamic memory allocatiosn (including std::string, std::vector). <br>
+
+NOTE: Function parameters can never be constexpr.
+
+## Conditional Operator
+Using constexpr for conditional operator : 
+```
+constexpr bool inBigClassroom { false };
+constexpr int classSize { inBigClassroom ? 30 : 20 };
+```
+
+## Inline functions
+Writing a simple function like min(x,y) and calling it can have several overheads like:
+```
+int min(int x, int y){
+    return (x < y) ? x : y;
+}
+
+int main(){
+    std::cout << min(5, 6) << '\n';
+}
+```
+- CPU must store the address of the current instruction it is executing (so it knows where to return to later)
+- + Along with the values of various CPU registers (so they can be restored upon returning)
+- Then parameters x and y must be instantiated and then initialized
+- Then the execution path has to jump to the code in the min() function
+- When the function ends, the program has to jump back to the location of the function call
+- The return value has to be copied so it can be output
+
+This a lot of overhead for just executing a simple min(x,y) function.
+
+
+### Earlier C++ Compilers
+Earlier compilers handled **inline** keyword explicitly and user put inline keyword to let the compiler have an **option** to optimize the overhead or ignore it (in case lopps are there)
+```
+inline int min(int x, int y) // inline keyword means this function is an inline function
+{
+    return (x < y) ? x : y;
+}
+```
+
+### Modern C++ Compilers
+Modern C++ compilers are smart enough to decide if inline expansion would reduce function overhead or not by doing **inline expansion** and it is done automatically, thereby inline keyword is no longer used in modern C++. <br>
+
+Most of the functions fall into inline expansion and only some don't.
+**Judging** <br>
+If the body of the function being expanded takes more instructions than the function call being replaced, then each inline expansion will cause the executable to grow larger. Larger executables tend to be slower.
+
+### Harms of inline keyword
+- Using inline to request inline expansion is a form of **premature optimization**, and misuse could actually harm performance
+- The inline keyword is just a hint -- the compiler is completely **free to ignore** a request to inline a function
+- **BEST PRACTICE** : Do not use the inline keyword to request inline expansion for your functions.
+
+## Modern "inline" usage
+In modern C++, the term inline has evolved to mean “multiple definitions are allowed”.
+```
+// pi.h
+#ifndef PI_H
+#define PI_H
+
+inline double pi() { return 3.14159; };
+
+inline std::mt19937 generate()
+{
+	std::random_device rd{};
+
+	// Create seed_seq with clock and 7 random numbers from std::random_device
+	std::seed_seq ss{
+		static_cast<std::seed_seq::result_type>(std::chrono::steady_clock::now().time_since_epoch().count()),
+			rd(), rd(), rd(), rd(), rd(), rd(), rd() };
+
+	return std::mt19937{ ss };
+}
+
+#endif
+```
+```
+//main.cpp:
+
+#include "pi.h" // will include a copy of pi() here
+#include <iostream>
+
+double circumference(double radius); // forward declaration
+
+int main(){
+    std::cout << pi() << '\n';
+    std::cout << circumference(2.0) << '\n';
+
+    return 0;
+}
+```
+```
+//math.cpp
+
+#include "pi.h" // will include a copy of pi() here
+
+double circumference(double radius){
+    return 2.0 * pi() * radius;
+}
+```
+1.  In the code above, both main.cpp and math.cpp will have the copy of ```inline double pi() { return 3.14159; }```, but it will be de-duplicated by complier since it is put as an inline variable. <br>
+
+2. Similar statement goes for std::mt19937 generate() random number **general purpose function**. <br>
+
+3. They should generally be used in  **header-only libraries** <br>
+
+
+
