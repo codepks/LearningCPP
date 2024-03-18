@@ -1791,6 +1791,13 @@ std::cout << 7 << '\n';
 
 Had it been ```const int x {7}```, the compiler would have optmized it anyway.
 
+> Order of optimization for compiler is
+> - Compile-time constant variables (always eligible to be optimized)
+> - Runtime constant variables
+> - Non-const variables (likely optimized in simple cases only)
+
 ### Debugging Issue
 Due to variable removal in optimization, the variables are often skipped while debugging. <br>
 But debugger these days have optimizations turned off.
+
+## Constexpr Variables
