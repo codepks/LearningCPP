@@ -2139,7 +2139,7 @@ printString(s);
 
 Lots of needless copying happening above for strings and expensive operation <br>
 
-### std::string property
+### std::string_view property
 std::string_view provides **read-only access** to an existing string. <br>
 ```
 void printString(std::string_view str) // str makes a copy of its initializer{
@@ -2151,8 +2151,82 @@ printString(s);
 In the code above:
 1. `s` has a read only access to to `"Hello, World!"` string without making copy initilization
 2. similarly, `str` in `printString()` also has read access to `"Hello, World!"` without making copy
+3. `string_view` views the object that already exists elsewhere and cannot modify that object
+4. ** If the string being viewed is modified** or destroyed while the view is still being used, unexpected or **undefined** behavior will result, also known as **dangling view**
+```
+ std::string message = "Hello, world!";
+ std::string_view view{ message };
 
- std::string_view parameter will accept arguments of type `C-style string`, a `std::string`, or `std::string_view`
+ std::cout << "View: " << view << std::endl;
+ message = "Modified message"; // Modifying the original string
+ std::cout << "View after modification: " << view << std::endl; //undefined behaviour
+
+//Revalidate
+view = message;
+```
+output
+```
+View: Hello, world!
+View after modification: ╬àorld! //undefined
+```
+After modification, of the string std::string_view does not own the data it references, hence undefined behaviour. <br>
+OR - OTHER EXAMPLE
+```
+std::string getName(){
+    std::string s { "Alex" };
+    return s;
+}
+
+int main(){
+  std::string_view name { getName() }; // name initialized with return value of function
+  std::cout << name << '\n'; // undefined behavior
+}
+```
+`s` is destroyed at the end of the scope. <br>
+
+OR <br>
+Initializing with string literal, as it is temporary
+```
+using namespace std::string_literals;
+std::string_view name { "Alex"s }; // "Alex"s creates a temporary std::string
+std::cout << name << '\n'; // undefined behavior
+```
+OR<br>
+returning string to string_view by value :
+```
+std::string_view getBoolName(bool b)
+{
+    std::string t { "true" };  // local variable
+    std::string f { "false" }; // local variable
+
+    if (b)
+        return t;  // return a std::string_view viewing t
+	//return "true"; Use "C Style Strings" instead
+
+    return f; // return a std::string_view viewing f
+} // t and f are destroyed at the end of the function
+```
+In the code above, `t` is destroyed by the end of the function, hence string_view would become invalid too. <br>
+Use C-Style strings instead as they exist throughout the entire program. <br>
+
+std::string_view parameter will accept arguments of type `C-style string`, a `std::string`, or `std::string_view`
+
+**OK Usage of string_view** <br>
+```
+std::string_view firstAlphabetical(std::string_view s1, std::string_view s2){
+    return s1 < s2 ? s1: s2; // uses operator?: (the conditional operator)
+}
+
+int main(){
+    std::string a { "World" };
+    std::string b { "Hello" };
+    std::cout << firstAlphabetical(a, b) << '\n'; // prints "Hello"
+}
+```
+Since, `a` and `b` are not getting destroyed which string_vew processes them in the functio, hence it will be okay.
+
+
+
 
  ### string_view to string
  1. We can directly inialize string with string_view  : `std::string s{ sv };`
@@ -2164,3 +2238,25 @@ Contrary to support with std::string(due to dunamic allocation), std::string_vie
 constexpr std::string_view s{ "Hello, world!" }; // s is a string symbolic constant
 std::cout << s << '\n'; // s will be replaced with "Hello, world!" at compile-time
 ```
+
+### string_view vs string&
+For function parameter, always prefer `string_view` over `string&`
+
+### Modifiying with string_view
+The modification fucntions does not affect the original string here. We can use `remove_prefix()` and `remove_suffix()`
+```
+std::string_view str{ "Peach" };
+std::cout << str << '\n'; 
+
+// Remove 1 character from the left side of the view
+str.remove_prefix(1);
+std::cout << str << '\n'; //prints "each"
+
+// Remove 2 characters from the right side of the view
+str.remove_suffix(2);
+std::cout << str << '\n'; //prints "ea"
+```
+
+### null termination
+A C-style string literal and a std::string are always null-terminated. <br>
+A std::string_view may or may not be null-terminated.
