@@ -2733,7 +2733,35 @@ int main(){
 }
 ```
 
-## Local Variables
+## Global Variables
+Gloabl varaibles are have global namespace scope.
 
+### Duration
+They start even before the **main()** begins and end when main() ends. Due to their duration they are also called _static variables_ (local variables are called automatic variables).
 
+### Initilization
+They are 0 initilized by default unlike global variables.
+```
+int g_x;       // no explicit initializer (zero-initialized by default)
+```
 
+### Constant Global  Variables
+Non-constant global variables should generally be avoided altogether.
+
+## Name Shadowing
+```
+int main(){
+int apples { 5 }; { // here's the outer block apples
+	std::cout << apples << '\n'; // print value of outer block apples
+        int apples{ 0 }; // define apples in the scope of the nested block
+        apples = 10; // this assigns value 10 to nested block apples, not outer block apples
+        std::cout << apples << '\n'; // print value of nested block apples
+    }
+    std::cout << apples << '\n'; // prints value of outer block apples
+    return 0;
+}
+```
+Here `apples{0}` is getting in the scope it gets initilized and it's he same apple which is assigned value `10`, until then out apple variable is shadowed by inner `apple` <br>.
+
+**Shadowing of global variable** <br>
+In the same way the global variables are shadowed by local variables. What's why we should always use **::** in order to indicate the global variable.
