@@ -2520,3 +2520,124 @@ std::cout << !a && (b || c);
 std::cout << not a and (b or c);
 ```
 
+# Bit Manipulation
+## Bit sequencing
+```
+00000101  Bit sequence
+76543210  Bit position
+```
+Bit sequencing starts from right to left
+
+## std::bitset
+4 member functions:
+1. test()
+2. set()
+3. reset()
+4. flip()
+
+```
+std::bitset<8> bits{ 0b0000'0101 }
+std::cout << "All the bits: " << bits<< '\n';
+
+//output
+All the bits: 00001101
+```
+
+## Encoding bitset
+```
+[[maybe_unused]] constexpr int  isHungry   { 0 };
+[[maybe_unused]] constexpr int  isSad      { 1 };
+[[maybe_unused]] constexpr int  isMad      { 2 };
+[[maybe_unused]] constexpr int  isHappy    { 3 };
+[[maybe_unused]] constexpr int  isLaughing { 4 };
+[[maybe_unused]] constexpr int  isAsleep   { 5 };
+[[maybe_unused]] constexpr int  isDead     { 6 };
+[[maybe_unused]] constexpr int  isCrying   { 7 };
+
+std::bitset<8> me{ 0b0000'0101 }; // we need 8 bits, start with bit pattern 0000 0101
+me.set(isHappy);      // set bit position 3 to 1 (now we have 0000 1101)
+me.flip(isLaughing);  // flip bit 4 (now we have 0001 1101)
+me.reset(isLaughing); // set bit 4 back to 0 (now we have 0000 1101)
+```
+
+## Bitwise Operators
+1. x << y	all bits in x shifted left y bits
+2. x >> y	all bits in x shifted right y bits
+3. ~x	all bits in x flipped
+4. x & y	each bit in x AND each bit in y
+5. x | y	each bit in x OR each bit in y
+6. x ^ y	each bit in x XOR each bit in y
+
+## Bitwise assignment operators
+1. x <<= y	Shift x left by y bits
+2. x >>= y	Shift x right by y bits
+3. x |= y	Assign x | y to x
+4. x &= y	Assign x & y to x
+5. x ^= y	Assign x ^ y to x
+
+
+### Rightshift
+**Operator**
+```
+std::bitset<4> x { 0b1100 };
+std::cout << (x >> 1) << '\n'; // shift right by 1, yielding 0110
+```
+**Assignment Operator**
+```
+std::bitset<4> bits { 0b0100 };
+bits >>= 1;
+```
+
+
+### NOT
+```
+std::cout << ~std::bitset<4>{ 0b0100 }
+```
+
+### OR
+```
+std::cout << (std::bitset<4>{ 0b0101 } | std::bitset<4>{ 0b0110 })
+```
+
+### AND
+```
+std::cout << (std::bitset<4>{ 0b0101 } & std::bitset<4>{ 0b0110 }) << '\n';
+```
+
+## Bit Masking
+- Bitwise operators don’t know how to work with bit positions. Instead they work with bit masks.
+- A bit mask is a predefined set of bits that is used to select which specific bits will be modified by subsequent operations.
+
+### In C++ 14
+```
+constexpr std::uint8_t mask6{ 0b0100'0000 }; // represents bit 6
+constexpr std::uint8_t mask7{ 0b1000'0000 }; // represents bit 7
+```
+### In C++ 11 and before
+We use hex digits
+```
+constexpr std::uint8_t mask6{ 0x40 }; // hex for 0100 0000
+constexpr std::uint8_t mask7{ 0x80 }; // hex for 1000 0000
+```
+Easier version :
+```
+constexpr std::uint8_t mask6{ 1 << 6 }; // 0100 0000
+constexpr std::uint8_t mask7{ 1 << 7 }; // 1000 0000
+```
+
+### Testing on/off using bitmask
+
+```
+[[maybe_unused]] constexpr std::uint8_t mask6{ 0b0100'0000 }; // represents bit 6
+[[maybe_unused]] constexpr std::uint8_t mask7{ 0b1000'0000 }; // represents bit 7
+
+std::uint8_t flags{ 0b0000'0101 }; // 8 bits in size means room for 8 flags
+
+std::cout << "bit 0 is " << (static_cast<bool>(flags & mask0) ? "on\n" : "off\n");
+std::cout << "bit 1 is " << (static_cast<bool>(flags & mask1) ? "on\n" : "off\n");
+```
+
+We use '&` between mask and bitset and then do `static_cast<bool>` on the result.
+
+
+
