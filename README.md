@@ -2607,6 +2607,7 @@ std::cout << (std::bitset<4>{ 0b0101 } & std::bitset<4>{ 0b0110 }) << '\n';
 ## Bit Masking
 - Bitwise operators don’t know how to work with bit positions. Instead they work with bit masks.
 - A bit mask is a predefined set of bits that is used to select which specific bits will be modified by subsequent operations.
+- A best practice is to **give your bit masks useful names** as a way to document the meaning of your bit flags
 
 ### In C++ 14
 ```
@@ -2625,7 +2626,7 @@ constexpr std::uint8_t mask6{ 1 << 6 }; // 0100 0000
 constexpr std::uint8_t mask7{ 1 << 7 }; // 1000 0000
 ```
 
-### Testing on/off using bitmask
+### Testing on/off 
 
 ```
 [[maybe_unused]] constexpr std::uint8_t mask6{ 0b0100'0000 }; // represents bit 6
@@ -2640,4 +2641,50 @@ std::cout << "bit 1 is " << (static_cast<bool>(flags & mask1) ? "on\n" : "off\n"
 We use '&` between mask and bitset and then do `static_cast<bool>` on the result.
 
 
+### Set bit
+We use `OR` operator in this case
+```
+std::uint8_t flags{ 0b0000'0101 }; // 8 bits in size means room for 8 flags
+flags |= mask1; // turn on bit 1
+```
+### Resetting a bit
+ ```
+std::uint8_t flags{ 0b0000'0101 }; // 8 bits in size means room for 8 flags
+flags &= ~mask2; // turn off bit 2
+```
+### Flipping a bit
+```
+std::uint8_t flags{ 0b0000'0101 }; // 8 bits in size means room for 8 flags
+flags ^= mask2; // flip bit 2
+```
+
+### Usage 
+Imagine a function taking 32 boolean parameters, so instead of passing 32 boolean parameters, one can use below instead
+```
+void someFunction(std::bitset<32> options);
+```
+and play with your arguments like this:
+```
+someFunction(option10 | option32);
+```
+
+### OpelGL Example
+```
+#define GL_DEPTH_BUFFER_BIT               0x00000100
+#define GL_STENCIL_BUFFER_BIT             0x00000400
+#define GL_COLOR_BUFFER_BIT               0x00004000
+
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the color and the depth buffer
+```
+
+## 2's Complement
+- Signed integers are typically stored using a method known as **two’s complement**
+- Positive signed numbers are represented in binary just like positive unsigned numbers (with the sign bit set to 0)
+- Negative signed numbers are represented in binary as the bitwise inverse of the positive number, plus 1
+
+```
+First we figure out the binary representation for 5: 0000 0101
+Then we invert all of the bits: 1111 1010
+Then we add 1: 1111 1011
+```
 
