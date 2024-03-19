@@ -2260,3 +2260,263 @@ std::cout << str << '\n'; //prints "ea"
 ### null termination
 A C-style string literal and a std::string are always null-terminated. <br>
 A std::string_view may or may not be null-terminated.
+
+
+# Operators
+
+## Precedence and associativity
+How is BODMAS followed in C++:
+
+### Operator Precedence
+Operators with a higher precedence level are grouped with operands first. <br>
+**multiplication and division (precedence level 5)** have a higher precedence level than **addition and subtraction (precedence level 6)**. Thus, multiplication and division will be grouped with operands before addition and subtraction. In other words, `4 + 2 * 3` will be grouped as `4 + (2 * 3)`.
+
+### Operator Associativity
+For e.g. `7 - 4 - 1` <br>
+
+operator’s associativity tells the compiler whether to evaluate the operators from left to right or from right to left. Subtraction has precedence level 6, and the operators in precedence level 6 have an associativity of left to right.<br>
+So this expression is grouped from left to right: `(7 - 4) - 1`.
+
+### General Usage
+It's difficult to remember the precedence and associativity from the tables, so the developer should make the operation explicit by put the paranthesis by himself/herself.
+
+```
+int getValue(){
+        int x{};
+    std::cin >> x;
+    return x;
+}
+
+void printCalculation(int x, int y, int z){
+    std::cout << x + (y * z);
+}
+
+int main(){
+    printCalculation(getValue(), getValue(), getValue()); 
+    return 0;
+}
+```
+In the above function call `printCalculation(getValue(), getValue(), getValue());`, the values are entered in `printCalculation(3,2,1);` as arguments evaluate in **right-to-left** order.
+
+
+## Arithmatic Operators
+### Unary
+in `+5` and `-5` , `+` and `-` are unary operators
+
+### Bianry
+`+`,`-`, `/`, `*`, `%`
+
+### Integer and Floating Point division
+If either of the operads is a floating point, then the output is also a floating point: <br>
+`7.0 / 4 = 1.75`, `7 / 4.0 = 1.75`, and `7.0 / 4.0 = 1.75` <br>
+<br>
+If both are integers then they output integer only: <br>
+`7 / 4 = 1`
+
+### Utilising static_cast 
+If we have input as integers only, we can do static_cast to convert them to floating point in order to assist the floating point division.
+
+```
+constexpr int x{ 7 };
+constexpr int y{ 4 };
+
+std::cout << "int / int = " << x / y << '\n';
+std::cout << "double / int = " << static_cast<double>(x) / y << '\n';
+std::cout << "int / double = " << x / static_cast<double>(y) << '\n';
+std::cout << "double / double = " << static_cast<double>(x) / static_cast<double>(y) << '\n';
+```
+
+
+## Remainder Operator
+Remainder takes the sign of the first operand.
+
+Example 1
+```
+Enter an integer: 6
+Enter another integer: -4
+The remainder is: 2
+```
+Example 2
+```
+Enter an integer: -6
+Enter another integer: 4
+The remainder is: -2
+```
+
+## Exponent Operator
+It exists in `cmath` library <br>
+```
+std::pow(3.0, 4.0)
+```
+
+## Increment/decrement operators
+
+### Pre-increment
+```
+int y { ++x };
+```
+In the code above steps are:
+1. `x` is incremented
+2. `x` is evaluated
+3. Evaluated `x` is assigned to `y`
+
+### Post increment
+```
+int x { 5 };
+int y { x++ };
+```
+1. A temporary copy of `x` is made that starts with the same value as `x(5)`
+2. Then the actual `x` is incremented from `5` to `6`
+3. Then the copy of `x` (which still has value `5`) is returned and assigned to `y`
+4. Temporary copy is discarded.
+
+Post-increment involves a lot of steps hence it is not same in performace compared to pre-increment.
+
+## When to use?
+Whereever both can be used, prefer pre increment
+
+## Side Effects
+A function and expression has a side effect when it have observable effect beyong returning value.
+
+```
+++x
+```
+In the code above, apart from returning increment value, the value of x also gets affected which is a side effect
+
+```
+std::cout << x;
+```
+In the code above, apart from output the value to <<, it shows the value on console to which is a side effect.
+
+### Order of evaluation
+```
+int x { 5 };
+int value{ add(x, ++x) };
+```
+ - If the left argument is evaluated first, this becomes a call to add(5, 6), which equals 11.
+ -  If the right argument is evaluated first, this becomes a call to add(6, 6), which equals 12!
+ -   At the end it all depends on the compiler.
+ -   Visual Studio and GCC evaluate this as 2 + 2, and Clang evaluates it as 1 + 2! This is due to differences in when the compilers apply the side effect of incrementing x.
+
+## Comma Operator
+**Dangerous usage** <br>
+
+```
+int x{ 1 };
+int y{ 2 };
+std::cout << (++x, ++y) << '\n'; // increment x and y, evaluates to the right operand
+```
+In the code above, x is evaluated first and then y, but only ye is assgiened to z.
+
+```
+z = (a, b);
+```
+Similary above, b is assigned to z.
+
+## Relational Operators
+### Comparing equal floating values
+```
+constexpr double d1{ 100.0 - 99.99 }; // should equal 0.01 mathematically
+constexpr double d2{ 10.0 - 9.99 }; // should equal 0.01 mathematically
+
+if (d1 == d2)
+        std::cout << "d1 == d2" << '\n';
+    else if (d1 > d2)
+        std::cout << "d1 > d2" << '\n';
+    else if (d1 < d2)
+        std::cout << "d1 < d2" << '\n';
+```
+OUTPUT
+```
+d1 > d2
+```
+Even though both are equal but but they wouldn't be equal as floating values **not precise and rounding errors are always involved**. <br>
+
+In non-equal operands, they produce reliable answer, but in case of equal operands, their answer may not be reliable <br>
+
+### == and != for floating values
+It should be generally avoiding for floating values as the answers are generally unreliablr.
+
+**Exception** <br>
+In case of comparing literals, it will work well. literal has some specific and unique representation in memory.
+```
+if (someFcn() == 0.0) // okay if someFcn() returns 0.0 as a literal only
+
+constexpr double gravity { 9.8 }
+if (gravity == 9.8) // okay if gravity was initialized with a literal
+```
+ ### Resolution  - epsilon
+ We can use some **tolerance** value <br>
+
+ Using **epsilon** which means close enough<br>
+ ```
+bool approximatelyEqualAbs(double a, double b, double absEpsilon){
+        return std::abs(a - b) <= absEpsilon;
+}
+
+int main(){
+    double a = 1.5;
+    double b = 1.55;
+    double epsilon = 0.1;
+}
+```
+`std::abs(a - b) <= absEpsilon` checks if the distance between a and b is less than or equal to whatever epsilon value representing “close enough” was passed in.
+
+### Reslution - Knuth's algorithm
+```
+bool approximatelyEqualRel(double a, double b, double relEpsilon){
+	return (std::abs(a - b) <= (std::max(std::abs(a), std::abs(b)) * relEpsilon));
+}
+```
+Explaination: <br>
+The algorithm chooses the larger of a and b (as a rough indicator of the overall magnitude of the numbers), and then multiplies it by relEpsilon. In this function, relEpsilon represents a percentage. For example, if we want to say “close enough” means a and b are within 1% of the larger of a and b, we pass in an relEpsilon of 0.01 (1% = 1/100 = 0.01). The value for relEpsilon can be adjusted to whatever is most appropriate for the circumstances (e.g. an epsilon of 0.002 means within 0.2%). <br>
+
+## Logical Operators
+
+### Not operator
+```
+int x{ 5 };
+int y{ 7 };
+
+(!x > y)
+```
+Logical NOT operator has higher precedence than the greater than operator, the expression `! x > y` actually evaluates as `(!x) > y`. Since `x` is `5`, `!x` evaluates to `0`.
+
+### && Operator
+**Short circuit evaluation** <br>
+If the left operand evaluates to false, logical AND knows it must return false regardless of whether the right operand evaluates to true or false. In this case, the logical AND operator will go ahead and return false **immediately without even evaluating the right operand**! <br>
+```
+if (x == 1 && ++y == 2)
+    // do something
+```
+Operators with side effect like `++y` should not be used for compound expressions.
+
+**RESOLUTION** <br>
+If you overload these operators to make them work with your own types, those overloaded operators will not perform short-circuit evaluation.
+
+### && vs ||
+&& operator has high precedence over || <br>
+
+In an example of `value1 || value2 && value3`, because logical AND has higher precedence, this evaluates as `value1 || (value2 && value3)`, not `(value1 || value2) && value3`.
+
+**RESOLUTION**
+rather than writing `value1 && value2 || value3 && value4`, it is better to write `(value1 && value2) || (value3 && value4)`.
+
+### XOR
+We can use `!=` operator instead<br>
+
+Extension : <br>
+```
+if (a != b != c) ... // a XOR b XOR c, assuming a, b, and c are bool
+```
+
+## Alternative Operators 
+- `&&` - `and`
+- `||` - 'or'
+- '!' - 'not'
+
+```
+std::cout << !a && (b || c);
+std::cout << not a and (b or c);
+```
+
