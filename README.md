@@ -2688,3 +2688,52 @@ Then we invert all of the bits: 1111 1010
 Then we add 1: 1111 1011
 ```
 
+# Scope, Duration & Linkage
+
+## Limit og Nesting
+Keep the nesting level of your functions to 3 or less. If your function has a need for more nested levels, consider refactoring your function into sub-functions.
+
+## Scoped vs gloabl function
+```
+void print() // this print() lives in the global namespace{ std::cout << " there\n"; }
+namespace Foo{
+	void print() // this print() lives in the Foo namespace	{ std::cout << "Hello";	}
+
+	void printHelloThere()	{
+		print();   // calls print() in Foo namespace
+		::print(); // calls print() in global namespace
+	}
+}
+```
+
+## Forward Decl in namespace
+Both forward declaration and definition shoudl be inside namespace.
+```
+namespace BasicMath{
+    // function add() is part of namespace BasicMath
+    int add(int x, int y);
+}
+```
+```
+#include "add.h"
+namespace BasicMath{
+    // define the function add() inside namespace BasicMath
+    int add(int x, int y)    {
+        return x + y;
+    }
+}
+```
+```
+#include "add.h" // for BasicMath::add()
+#include <iostream>
+
+int main(){
+    std::cout << BasicMath::add(4, 3) << '\n';
+    return 0;
+}
+```
+
+## Local Variables
+
+
+
