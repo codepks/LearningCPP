@@ -3281,15 +3281,154 @@ Equivalent while statement:
     }
 } // variables defined inside the loop go out of scope here
 ```
+### Continue statement
+It is used to skip the further steps in an iteration and instead move to next iteration
+```
+int main(){
+    for (int count{ 0 }; count < 10; ++count)    {
+        // if the number is divisible by 4, skip this iteration
+        if ((count % 4) == 0)
+            continue; // go to next iteration
+
+        // If the number is not divisible by 4, keep going
+        std::cout << count << '\n';
+    }
+
+    return 0;
+}
+```
+### Early returns
+Use return, break and continue inside a loop judiciousouly as they can are not easy to read while goin throug a code.
+
+## exit and abort
+### std::exit() of main
+A normal program termination happens in std::exit. Steps are:
+- First, objects with static storage duration are destroyed
+- Then some other miscellaneous file cleanup is done if any files were used
+- Finally, control is returned back to the OS, with the argument passed to std::exit() used as the status code
+
+### std::exit explicit call
+In this case, calling `std::exit()` explicitly: `std::exit()` **does not clean up any local variables** (either in the current function, or in functions up the call stack). Because of this, it’s generally better to **avoid** calling std::exit().
+
+## cleanup() solution
+- One can adde `cleanup()` function before the `std::exit` for clean exit
+- Use `std::atexit()` which allows you to specify a function that will automatically be called on program termination via `std::exit()`
+
+```
+void cleanup(){
+    // code here to do any kind of cleanup required
+    std::cout << "cleanup!\n";
+}
+
+int main(){
+    // register cleanup() to be called automatically when std::exit() is called
+    std::atexit(cleanup); // note: we use cleanup rather than cleanup() since we're not making a function call to cleanup() right now
+
+    std::cout << 1 << '\n';
+
+    std::exit(0); // terminate and return status code 0 to operating system
+
+    // The following statements never execute
+    std::cout << 2 << '\n';
+
+    return 0;
+}
+```
+you can register multiple cleanup functions using `std::atexit()` if you want, and they will be called in reverse order of registration (the last one registered will be called first).
+
+### exit for threads
+- Calling std::exit() can cause your program to crash (because the thread calling std::exit() will cleanup static objects that may still be accessed by other threads)
+- So we have `std::quick_exit()` and `std::at_quick_exit()` for this
 
 
+### std::abort
+- It is generally called in case of runtime abnormal situation like zero divide by zero
+- It too doesn't do any cleanup
+
+### std::terminate()
+It is implicitly called in case of exceptions although it can be called explicitly too
 
 
+# Error Handling
+## Unit Testing
+### Basic way of unit testing
+```
+bool isLowerVowel(char c){
+    switch (c)    {
+    case 'a':
+    case 'e':
+    case 'i':
+    case 'o':
+    case 'u':
+        return true;
+    default:
+        return false;
+    }
+}
 
+// returns the number of the test that failed, or 0 if all tests passed
+int testVowel(){
+    if (!isLowerVowel('a')) return 1;
+    if (isLowerVowel('q')) return 2;
+    return 0;
+}
 
+int main(){
+    int result { testVowel() };
+    if (result != 0)
+        std::cout << "testVowel() test " << result << " failed.\n";
+    else
+        std::cout << "testVowel() tests passed.\n";
+    return 0;
+}
+```
+### Using assert
+```
+#include <cassert> // for assert
+#include <cstdlib> // for std::abort
+#include <iostream>
 
+bool isLowerVowel(char c){
+    switch (c)    {
+    case 'a':
+    case 'e':
+    case 'i':
+    case 'o':
+    case 'u':
+        return true;
+    default:
+        return false;
+    }
+}
 
+// Program will halt on any failed test case
+int testVowel(){
+#ifdef NDEBUG
+    std::cerr << "Tests run with NDEBUG defined (asserts compiled out)";
+    std::abort();
+#endif
+    assert(isLowerVowel('a'));
+    assert(isLowerVowel('e'));
+    assert(isLowerVowel('i'));
+    assert(isLowerVowel('o'));
+    assert(isLowerVowel('u'));
+    assert(!isLowerVowel('b'));
+    assert(!isLowerVowel('q'));
+    assert(!isLowerVowel('y'));
+    assert(!isLowerVowel('z'));
 
+    return 0;
+}
+
+int main(){
+    testVowel();
+
+    // If we reached here, all tests must have passed
+    std::cout << "All tests succeeded\n";
+
+    return 0;
+}
+```
 
 
 
