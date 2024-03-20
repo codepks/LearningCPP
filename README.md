@@ -2986,3 +2986,90 @@ namespace constants
 ```
 
 But it works same as Method 1 and this method does retain the downside of requiring every file that includes the constants header be recompiled if any constant value is changed.
+
+## Static Local Variables
+1. Variable is now created at the **start** of the program, and **destroyed** at the end of the program
+2. static variable will **retain its value** even after it goes out of scope
+
+### Initialization
+1. Static local variables that are **zero initialized** `static int s_value` or have a **constexpr initializer** `static int s_value{ 1 }` can be initialized at **program start** 
+2. Static local variables that have **no initializer** or a **non-constexpr initializer** are zero-initialized at **program start**
+3. Static local variables with a **non-constexpr initializer** are **reinitialized** the first time the variable **definition is encountered**
+
+NOTE: Program start here means after main function.
+
+### Working
+```
+#include <iostream>
+
+struct Int
+{
+	Int() = default;
+
+	Int(int b) { a = b;}
+
+	Int(const Int& obj) { a = obj.a; }
+
+	int a = 0;
+};
+
+
+void myFunction() {
+	// calls Int() = default;
+	// calls int a = 0;
+	// Called again 2 more times
+	Int obj1;
+
+	// calls Int(const Int& obj)
+	// int a = 0;
+	// Called only once and it retains its value as it is skipped in subsequent calls
+	static Int obj2 = obj1;
+
+}
+
+int main() {
+	myFunction(); // Output: Count in myFunction: 0
+	myFunction(); // Output: Count in myFunction: 1
+	myFunction(); // Output: Count in myFunction: 2
+	return 0;
+}
+```
+
+### Usage
+1. It is very well used for unique ID generation
+2. They offer benefit of global variables but limit its access to a scope
+
+
+### Dont's
+Don't alter your code flow like this
+```
+int getInteger(){
+	static bool s_isFirstCall{ true };
+
+	if (s_isFirstCall)	{
+		std::cout << "Enter an integer: ";
+		s_isFirstCall = false;
+	}
+	else	{
+		std::cout << "Enter another integer: ";
+	}
+
+	int i{};
+	std::cin >> i;
+	return i;
+}
+
+int main(){
+	int a{ getInteger() };
+	int b{ getInteger() };
+	std::cout << a << " + " << b << " = " << (a + b) << '\n';
+	return 0;
+}
+```
+
+- In the code above, the two calls of g**etInteger() are behaving differently**
+- So **don't** use static variables to **change the code flow**
+- Static local variables should only be used if in your entire program and in the foreseeable future of your program, **the variable is unique**
+
+## Summary
+[Check Summary here](https://www.learncpp.com/cpp-tutorial/scope-duration-and-linkage-summary/)
