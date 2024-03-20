@@ -3073,3 +3073,71 @@ int main(){
 
 ## Summary
 [Check Summary here](https://www.learncpp.com/cpp-tutorial/scope-duration-and-linkage-summary/)
+
+## Declarations and Directives
+
+### Declarations
+```
+int main(){
+   using std::cout; // this using declaration tells the compiler that cout should resolve to std::cout
+   cout << "Hello world!\n"; // so no std:: prefix is needed here!
+
+   return 0;
+} // the using declaration expires at the end of the current scope
+```
+
+For avoid to write `std::` in front of cout everytime within a scope, we can use decalrations like using `std::cout` and its validity would be there till scope end.
+
+### Directives
+
+Or we can use ```using namespace std;:
+```
+int main(){
+   using namespace std; // this using directive tells the compiler to import all names from namespace std into the current namespace without qualification
+   cout << "Hello world!\n"; // so no std:: prefix is needed here
+
+   return 0;
+}
+```
+
+## Unnamed namespaces
+```
+namespace { // unnamed namespace
+    void doSomething() { // can only be accessed in this file
+        std::cout << "v1\n";
+    }
+}
+
+int main(){
+    doSomething(); // we can call doSomething() without a namespace prefix
+    return 0;
+}
+```
+- All content declared in an unnamed namespace is treated as if it is part of the parent namespace.
+- But the other effect of unnamed namespaces is that all identifiers inside an unnamed namespace are treated as if they have **internal linkage**
+
+## Inline namespaces
+This is done to create different **versions of functions** while keeping the same function name.
+```
+inline namespace V1 {// declare an inline namespace named V1 - default
+    void doSomething()  {
+        std::cout << "V1\n";
+    }
+}
+
+namespace V2 {// declare a normal namespace named V2
+    void doSomething() {
+        std::cout << "V2\n";
+    }
+}
+
+int main(){
+    V1::doSomething(); // calls the V1 version of doSomething()
+    V2::doSomething(); // calls the V2 version of doSomething()
+    doSomething(); // calls the inline version of doSomething() (which is V1) - default
+}
+```
+ALternatively, if you want to use V2 as default option then make it inline instead.
+
+
+
