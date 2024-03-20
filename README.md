@@ -2761,7 +2761,228 @@ int apples { 5 }; { // here's the outer block apples
     return 0;
 }
 ```
-Here `apples{0}` is getting in the scope it gets initilized and it's he same apple which is assigned value `10`, until then out apple variable is shadowed by inner `apple` <br>.
+Here `apples{0}` is getting in the scope it gets initilized and it's he same apple which is assigned value `10`, until then out apple variable is shadowed by inner `apple` .<br>
 
 **Shadowing of global variable** <br>
-In the same way the global variables are shadowed by local variables. What's why we should always use **::** in order to indicate the global variable.
+In the same way the global variables are shadowed by local variables. What's why we should always use **::** in order to indicate the global variable. <br>
+
+**NOTE** : Avoid Variable Shadowing
+
+## Linkage
+Variables and functions have either internal or external linkage.
+
+### Linkage for Variables
+- Local variables in general have internal linkage
+- A **non-const** global variable with **static** keyword have internal linkage
+- **Const** or **constexpr** global variables have internal linkage by default. They don't need _static_ keyword - if used it will be _ignored_.
+
+```
+//a.cpp
+const int x{ 10 };
+// int x{ 10 }; //This failes the compilation as this is external linkage variable
+int main(){
+	std::cout << x;
+}
+```
+
+```
+//b.cpp
+int x {5};
+```
+
+The above code compilation succeeds as const int x is an internal linkage.
+
+
+### Internal Linkage for functions
+Functions by default have external linkage, but can be made internal linkage with **static keyword**. <br>
+
+```
+//a.cpp
+int add(int x, int y){
+	return x + y;
+}
+```
+```
+//b.cpp
+static int add(int x, int y){
+	return x + y;
+}
+
+int main()
+{
+}
+```
+
+The above code would now compile has static added keyword is not exposed to linker and according to linker one one definition of global `add()` function exists. <br>
+
+There is no violation of ODR with internal objects.
+
+### static vs unnamedspace
+static keyword is not much for internal linkage, instead unnamed space is prefferred over it anytime for giver variety of identifiers internal linkage.
+
+## External Linkage
+ External linkage are truly “global” in that they can be used anywhere in your program!
+
+```
+//a.h
+extern int x;
+```
+```
+//a.cpp
+int x {10};
+```
+
+```
+#include "a.h"
+//b.cpp
+int main(){
+   std::cout << x;
+}
+```
+
+OUTPUT
+```
+10
+// Output for the code above would be 10 from x.
+// In order to access x you need to access the forward declation of x in a.h
+```
+
+### Functions External Linkage
+Functions have external linkage by default. In order to use then you should have forward declared in some header and included that header in your usge file.
+
+### Extern Keyword
+Variables with external linkage are called external variables hence **extern keyword**.
+
+Two meanings:
+- give this variable external linkage
+- this is a forward declaration for an external variable that is defined somewhere else
+
+- **Non constant**  variables are external by default, for them **extern keyword is not required**, if put, it would be ignored
+- Even **const** global variables which have internal linkage can be exposed to linker using **extern** keyword. But it is useless to do so. 
+- Same goes for **constexpr** keyword variables. But it is useless to do so.
+
+```
+int g_x { 2 }; // non-constant globals are external by default
+
+extern const int g_y { 3 }; // const globals can be defined as extern, making them external
+extern constexpr int g_z { 3 }; // constexpr globals can be defined as extern, making them external (but this is pretty useless, see the warning in the next section)
+```
+
+## (non-const) global variables are evil
+**BEST PRACTICE** : Avoid global variables.
+
+Reasons:
+1. Their values can be changed by any function that is called, and there is no easy way for the programmer to know that this will happen
+2. It is difficult to debug where the variable value got changed
+3. It makes code less modular
+
+### Initialization
+- Gloabl variables are initialized **even before the main** function
+- **Phase 1** : static initialization - gloabl variables with constant expressions are initialized first `int x {5}`
+- **Phase 2** : dynamic initialization - global variables with non-constexpr initializers are initialized. 
+```
+int init(){
+    return 5;
+}
+
+int g_something{ init() }; // non-constexpr initialization
+```
+- Within a single file, for each phase, global variables are generally initialized in order of definition
+
+### Best usage
+- In case of **loggers**. It probably makes sense to define this as a global, because you’re likely to only have one log in a program and it will likely be used everywhere in your program. The `std::cout` and `std::cin` objects are implemented as global variables as well.
+- If using a global variables otherwise, then put them under namespace
+- Try to use them via passing argements
+
+
+```
+namespace constants{
+    constexpr double gravity { 9.8 }; // has internal linkage, is accessible only within this file
+}
+
+double getGravity() // has external linkage, can be accessed by other files
+{
+    // We could add logic here if needed later
+    // or change the implementation transparently to the callers
+    return constants::gravity;
+}
+```
+
+## Sharing global costants
+It is generally helpful for constants like _Avogadro’s number_ or _gravity coefficient_ .<br>
+
+### Method 1 - constexpr
+Steps to use them:
+1. **Create a header file** to hold these constants
+2. Inside this header file, define a **namespace** (discussed in lesson 7.2 -- User-defined namespaces and the scope resolution operator)
+3. Add all your constants inside the **namespace** (make sure they’re constexpr)
+4. **#include** the header file wherever you need it
+
+```
+// define your own namespace to hold constants
+namespace constants{
+    // constants have internal linkage by default
+    constexpr double pi { 3.14159 };
+    constexpr double avogadro { 6.0221413e23 };
+    constexpr double myGravity { 9.2 }; // m/s^2 -- gravity is light on this planet
+    }
+#endif
+```
+
+### Downsides to above method 
+1.Since constant gloabl variables have insternal linkage that means each file they are included **will have their own copy**
+2. Changing value of any one of the constant  would cause recompilation of all  the file that include the header
+3. Although compiler optimizes by replacing the variable with values instead, but it might fail for large size constants.
+
+### Method 2 - const
+1. One way to avoid these problems is by turning these constants into external variables,  we can then have a single variable (initialized once) that is shared across all files.
+2. We’ll define the constants in a .cpp file (to ensure the definitions only exist in one place), and put forward declarations in the header
+3. We **use const instead of constexpr** in this method because constexpr variables can’t be forward declared
+**constants.h**
+```
+namespace constants{
+     extern const double pi;
+}
+```
+**constants.cpp**
+```
+
+#include "constants.h"
+namespace constants{
+    extern const double pi { 3.14159 };
+}
+```
+**main.cpp**
+```
+#include "constants.h" // include all the forward declarations
+int main(){
+     std::cout << "The circumference is: " << 2 *  constants::pi << '\n';
+}
+```
+
+Now , Any changes made to constants.cpp will require recompiling only `constants.cpp`.
+
+**Downside of this method** <br>
+1. n other files, the **compiler will only see the forward declaration**, which doesn’t define a constant value (and must be resolved by the linker). This means in other files, these are treated as **runtime constant** values, not compile-time constants
+2. Second, because compile-time constants can typically be optimized more than runtime constants, the compiler may **not be able to optimize** these as much
+
+
+### Method 3 - inline
+ These are variables that can have more than one definition, so long as those definitions are identical.
+
+ ```
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+// define your own namespace to hold constants
+namespace constants
+{
+    inline constexpr double pi { 3.14159 }; // note: now inline constexpr
+    inline constexpr double avogadro { 6.0221413e23 };
+    inline constexpr double myGravity { 9.2 }; // m/s^2 -- gravity is light on this planet
+    // ... other related constants
+}
+#endif
+```
+
+But it works same as Method 1 and this method does retain the downside of requiring every file that includes the constants header be recompiled if any constant value is changed.
