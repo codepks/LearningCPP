@@ -3178,9 +3178,46 @@ if (x = 0) // oops, we used an assignment here instead of a test for equality
 - `x = 0` first assigns the value `0` to `x`, then evaluates to the value of `x`, which is now `0`, which is Boolean false
 - Since the conditional is always false, the else statement always executes
 
+## constexpr if statement
+```
+int main(){
+	constexpr double gravity{ 9.8 };
+
+	if constexpr (gravity == 9.8) // now using constexpr if
+		std::cout << "Gravity is normal.\n";
+	else
+		std::cout << "We are not on Earth.\n";
+}
+```
+1. The conditional of a constexpr-if-statement will be evaluated at compile-time.
+2. If the constexpr conditional evaluates to true, the entire if-else will be replaced by the true-statement
+3. f the constexpr conditional evaluates to false, the entire if-else will be replaced by the false-statement
+
+## switch statements
+- Compared to the original if statement, the switch statement has the advantage of only **evaluating the expression once** (making it more efficient)
+- The one restriction is that the condition must evaluate to an **integral type** or **enumerated type**
+- Expressions that evaluate to floating point types, strings, and most other non-integral types may not be used here
+- Without `break` or `return` statement, all the statements are executed leading to fallthrough
 
 
+### fallthrough
+- Without the `break` or `return` statement the compiler generates warning
+- In this case one can use `[[fallthrough]]` statement to make the fallthrough intentional so that no warning is generated
 
+```
+switch (2)
+{
+	case 1:
+	  std::cout << 1 << '\n';
+	  break;
+	case 2:
+	  std::cout << 2 << '\n'; // Execution begins here
+	  [[fallthrough]]; // intentional fallthrough -- note the semicolon to indicate the null statement
+	case 3:
+	  std::cout << 3 << '\n'; // This is also executed
+break;
+} 
+```
 
 
 
