@@ -3219,6 +3219,73 @@ break;
 } 
 ```
 
+### Scoping
+```
+switch (1)
+{
+case 1: // does not create an implicit block
+    foo(); // this is part of the switch scope, not an implicit block to case 1
+    break; // this is part of the switch scope, not an implicit block to case 1
+default:
+    std::cout << "default case\n";
+    break;
+}
+```
+All the statements after case labels are considered scoped inside implcitly.
+
+
+## While loop
+**Doing something every n iteration** <br>
+We can use `%` operator to do so, like we have used `if (count % 10 == 0)` in the example below:      
+```
+#include <iostream>
+
+// Iterate through every number between 1 and 50
+int main()
+{
+    int count{ 1 };
+    while (count <= 50)    {
+        // print the number (pad numbers under 10 with a leading 0 for formatting purposes)
+        if (count < 10)        {
+            std::cout << '0';
+        }
+
+        // if the loop variable is divisible by 10, print a newline
+        if (count % 10 == 0)        {
+            std::cout << '\n';
+        }
+        // increment the loop counter
+        ++count;
+    }
+    return 0;
+}
+```
+
+## For loops
+Types are:
+1. for statement
+2. range based for loop
+
+```
+for (init-statement; condition; end-expression)
+   statement;
+```
+Equivalent while statement:
+```
+{ // note the block here
+    init-statement; // used to define variables used in the loop
+    while (condition)
+    {
+        statement; 
+        end-expression; // used to modify the loop variable prior to reassessment of the condition
+    }
+} // variables defined inside the loop go out of scope here
+```
+
+
+
+
+
 
 
 
