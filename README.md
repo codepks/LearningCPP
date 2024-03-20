@@ -3141,3 +3141,58 @@ ALternatively, if you want to use V2 as default option then make it inline inste
 
 
 # Control Flow
+
+## if else statement
+Always put blocks around statements under if to make it less error prone:
+```
+if (age >= minDrinkingAge)
+    addBeerToCart();
+```
+OR do this:
+```
+if (age >= minDrinkingAge) purchaseBeer();
+```
+## null statement
+For doing nothing under a condition
+```
+if (x > 10)
+    ; // this is a null statement
+```
+**More details** <br>
+```
+if (nuclearCodesActivated());
+    blowUpTheWorld();
+```
+The above code can be modified as :
+```
+if (nuclearCodesActivated())
+    ; // the semicolon acts as a null statement
+blowUpTheWorld(); // and this line always gets executed!
+```
+
+## operator = in condition
+```
+if (x = 0) // oops, we used an assignment here instead of a test for equality
+        std::cout << "You entered 0\n";
+```
+- `x = 0` first assigns the value `0` to `x`, then evaluates to the value of `x`, which is now `0`, which is Boolean false
+- Since the conditional is always false, the else statement always executes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
