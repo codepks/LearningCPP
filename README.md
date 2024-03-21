@@ -3644,3 +3644,30 @@ bool b2 = 3.0; // convert double to bool------------------------shows warning
 
 NOTE : **Brace initilization** would not allow some of these conversion which are supported by copy inilization.
 
+### Safety
+Not all numeric conversions are safe and they can be put into **3 safety categories**
+
+1. _Value-preserving conversions_ : Where there is no loss of data and are safe . **NO WARNINGS**<br>
+For e.g. `int` to `long` and `short` to `double`
+
+2. _Reinterpretive conversions_ : result may be outside the range of the source type and are potentially unsafe. **ERRORS**  <br>
+For e.g. `signed int` to an `unsigned int`
+```
+int n1 { 5 };
+unsigned int u1 { n1 }; // okay: will be converted to unsigned int 5 (value preserved)
+
+int n2 { -5 };
+unsigned int u2 { n2 }; // bad: will result in large integer outside range of signed int
+```
+In the 2nd example, since an unsigned int can’t represent negative numbers, the result will be a large integral value that is outside the range of a signed int.
+
+
+3. _Lossy conversions_ : Some data is lost during conversion and they show **WARNINGS** <br>
+For e.g. `double` to `int` OR `double` to `float`
+```
+int i = 3.0; // okay: will be converted to int value 3 (value preserved)
+int j = 3.5; // data lost: will be converted to int value 3 (fractional value 0.5 lost)
+```
+
+NOTE : Althoug `int` to `double` is a safe conversion since `int` is a 4 bytes data type and `double` is a 8 bytes data type. But in some architectures where `int` is also 8 bytes it might be a loss conversion.
+
