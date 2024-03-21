@@ -3704,7 +3704,7 @@ Types of narrowed conversions:
 
 NOTE: Narrowing conversions should be avoided as much as possible, because they are potentially unsafe
 
-## Safer Narrow Conversions
+## Safer Narrow Conversions - static_cast
 It is the **implicit** narrowing conversions which are warned by the compiler, we can instead convert them into **explicit** narrow conversions to avoid warnings using `static_cast` <br>
 
 ```
@@ -3717,4 +3717,28 @@ int main(){
     return 0;
 }
 ```
+
+## Brace initilization
+Brace initilization doesn't allow narrowing conversions.
+```
+int i { 3.5 }; // won't compile
+```
+Resolution: static_cast inside brace initilization
+```
+int i { static_cast<int>(d) };
+```
+
+## constexpr in conversions
+Present day compilers are smart enough to tell you if the narrowing conversion would be safe or not or if the value would be preserved or now. This can be achieved via constexpr <br>
+_When the source value of a narrowing conversion is constexpr, the specific value to be converted must be known to the compiler. In such cases, the compiler can perform the conversion itself, and then check whether the value was preserved._
+```
+int n1{ 5 };   // note: constexpr
+unsigned int u1{ n1 };  // okay: conversion is not narrowing due to exclusion clause
+```
+The code above gives error as in run time conversion from signed to unsigned data type may be unsafe.
+```
+constexpr int n1{ 5 };   // note: constexpr
+unsigned int u1{ n1 };  // okay: conversion is not narrowing due to exclusion clause
+```
+But the code above compiles well as `n1` is made `constexpr`and it **decides at the compile time that the conversion is possible.**
 
