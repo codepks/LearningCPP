@@ -3669,5 +3669,9 @@ int i = 3.0; // okay: will be converted to int value 3 (value preserved)
 int j = 3.5; // data lost: will be converted to int value 3 (fractional value 0.5 lost)
 ```
 
-NOTE : Althoug `int` to `double` is a safe conversion since `int` is a 4 bytes data type and `double` is a 8 bytes data type. But in some architectures where `int` is also 8 bytes it might be a loss conversion.
+NOTE : Althoug `int` to `double` is a safe conversion since `int` is a 4 bytes data type and `double` is a 8 bytes data type. But in some architectures where `int` is also 8 bytes it might be a loss conversion. <br>
+
+NOTE: In assembly language, for converting `int` to `float` value, the integer value is typically first extended or truncated to a specific size (e.g., 32-bit or 64-bit) if necessary, and then converted to a floating-point value.
+
+
 
