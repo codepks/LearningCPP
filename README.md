@@ -3612,7 +3612,7 @@ NOTE : While integral promotion is value-preserving, it **does not necessarily p
 ## Numeric Conversions
 Above we discussed _numeric promotions_ which is basically converting **narrow** numeric types **to** **wider** numeric types (typically `int` or `double`) <br>
 
-5 basic type of numeric conversions:
+**5 basic type** of numeric conversions: <br>
 1. Converting an integral type to any other integral type - (Mostly demotion and not promotion)
 ```
 short s = 3; // convert int to short
@@ -3641,4 +3641,6 @@ double d = 3; // convert int to double
 bool b1 = 3; // convert int to bool------------------------shows warning
 bool b2 = 3.0; // convert double to bool------------------------shows warning
 ```
+
+NOTE : **Brace initilization** would not allow some of these conversion which are supported by copy inilization.
 
