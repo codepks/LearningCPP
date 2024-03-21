@@ -3728,9 +3728,11 @@ Resolution: static_cast inside brace initilization
 int i { static_cast<int>(d) };
 ```
 
-## constexpr in conversions
-Present day compilers are smart enough to tell you if the narrowing conversion would be safe or not or if the value would be preserved or now. This can be achieved via constexpr <br>
+## constexpr exceptions in conversions
+Present day compilers are smart enough to tell you if the narrowing conversion would be safe or if the source value can fit in the destination value or not. This can be achieved via constexpr <br>
 _When the source value of a narrowing conversion is constexpr, the specific value to be converted must be known to the compiler. In such cases, the compiler can perform the conversion itself, and then check whether the value was preserved._
+
+### signed to unsigned
 ```
 int n1{ 5 };   // note: constexpr
 unsigned int u1{ n1 };  // okay: conversion is not narrowing due to exclusion clause
@@ -3742,3 +3744,40 @@ unsigned int u1{ n1 };  // okay: conversion is not narrowing due to exclusion cl
 ```
 But the code above compiles well as `n1` is made `constexpr`and it **decides at the compile time that the conversion is possible.**
 
+### double to float
+double to float is a narrowing conversion:
+```
+double d{ 0.1 }; 
+float f{ d }; 
+```
+The code above would give **error** due to narrowing conversion in brace initilization.
+```
+constexpr double d{ 0.1 }; 
+float f{ d };
+```
+but when doing constexpr the narrowing conversion is sorted out although with **warning**.
+
+### avoiding static_cast
+We can avoid static_cast if using constexpr
+```
+int n{ 5 };
+double d{ n};
+```
+The code above gives error as we are using brace initilizer. How to avoid this error:
+1. Copy initilization : worst solution as it is a implicit conversion 
+```
+int n{ 5 };
+double d = n;
+```
+
+2. static_casting : It is for runtime conversion support
+```
+int n{ 5 };
+double d { static_cast<double>(n)};
+```
+
+3. constexpr : for compile time resolution of conversion
+```
+constexpr int n{ 5 };
+double d {n);
+```
