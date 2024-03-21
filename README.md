@@ -3430,12 +3430,215 @@ int main(){
 }
 ```
 
+## Code Coverage
+
+1. **Code coverage** is used to describe how much of the source code of a program is executed while testing
+2. The term **Statement coverage** refers to the percentage of statements in your code that have been exercised by your testing routines
+3. **Branch coverage** refers to the percentage of branches that have been executed, each possible branch counted separately
+4. **Loop Coverage** or **0,1,2 test** used for loops. you should ensure it works properly when it iterates 0 times, 1 time, and 2 times.If it works correctly for the 2-iteration case, it should work correctly for all iterations greater than 2.
+
+## Fatal Errors
+If the error is so bad that the program can not continue to operate properly, this is called a non-recoverable error (also called a fatal error). In such cases, the best thing to do is terminate the program. <br>
+In such a case, a halt statement (such as std::exit())
+
+## Exceptions
+The basic idea is that when an error occurs, an exception is “thrown”. If the current function does not “catch” the error, the caller of the function has a chance to catch the error. If the caller does not catch the error, the caller’s caller has a chance to catch the error. The error progressively moves up the call stack until it is either caught and handled.
+
+## cout vs cerr vs logging
+
+## Input Validation
+
+## Assertions
+If the conditional expression evaluates to false, an error message is displayed and the program is terminated (via `std::abort` )
+
+```
+#include <cassert> // for assert()
+#include <cmath> // for std::sqrt
+#include <iostream>
+
+double calculateTimeUntilObjectHitsGround(double initialHeight, double gravity){
+  assert(gravity > 0.0); // The object won't reach the ground unless there is positive gravity.
+
+  if (initialHeight <= 0.0)  {
+    // The object is already on the ground. Or buried.
+    return 0.0;
+  }
+  return std::sqrt((2.0 * initialHeight) / gravity);
+}
+
+int main(){
+  std::cout << "Took " << calculateTimeUntilObjectHitsGround(100.0, -9.8) << " second(s)\n";
+  return 0;
+}
+```
+
+### Making it descriptive
+```
+assert(found && "Car could not be found in database");
+```
 
 
+## Assert vs Error Handling
+1. Assertions : Use assertions to document cases that should be logically impossible
+2. Error Handling : error handling is designed to gracefully handle cases that could happen
+
+**Assert** <br>
+- Many developers prefer that asserts are only active in debug builds. C++ comes with a way to turn off asserts in production code
+-  If the macro NDEBUG is defined, the assert macro gets disabled
+-  Some IDEs set NDEBUG by default as part of the project settings for release configurations
+
+## static_assert
+A static_assert is an assertion that is checked at **compile-time** rather than at runtime, with a failing static_assert causing a compile error. <br>
+
+**Format**
+```
+static_assert(condition, diagnostic_message)
+```
+
+- static_assert is not compiled out in release builds
+- static_assert can be placed anywhere in the code file (even in the global namespace).
+
+Usages:
+Usage 1:
+```
+constexpr int getValue() { return 42; }
+static_assert(getValue() == 42, "getValue() must return 42");
+```
+Usage 2:
+```
+#include <type_traits>
+
+template <typename T>
+class MyClass {
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+    // Class implementation...
+};
+```
+Usage 3:
+```
+template <typename T, typename U>
+struct SameSize {
+    static_assert(sizeof(T) == sizeof(U), "Types must have the same size");
+    // SameSize implementation...
+};
+```
 
 
+# Type conversions, aliases and deduction
+
+## Why conversion ?
+1. `3` might be stored as binary `0000 0000 0000 0000 0000 0000 0000 0011`
+2. `3.0` might be stored as binary `0100 0000 0100 0000 0000 0000 0000 0000`
+
+For this code:
+```
+float f{ 3 }; // initialize floating point variable with int 3
+```
+
+**Issue**: compiler can’t just copy the bits representing the int value 3 into the memory allocated for float variable f. <br>
+
+Instead, it needs to **convert the integer value 3 to the equivalent floating point** value `3.0`, which can then be stored in the memory allocated for f.
+
+## Implicit Type conversion
+- Happens when one data type is required but different data type is supplied
+- compiler will determine whether it can convert the value from the current type to the desired type
+- If a valid conversion can be found, then the compiler will produce a new value of the desired type
+- If the compiler can’t find an acceptable conversion, then the compilation will fail with a compile error
 
 
+## Standard Conversions
+Types are
+- Numeric promotions 
+- Numeric conversions 
+- Arithmetic conversions 
+- Other conversions 
+
+## Zero conversion
+- On architectures where int and long both have the same size and range
+- The same sequence of bits is used to represent values of both types
+- Therefore, **no actual conversion is needed** to convert a value between those types -- the value can simply be copied.
+
+## Numeric Promotion
+- It is a type conversion of certain narrower numeric types (such as a `char`) to certain wider numeric types (typically `int` or `double`)
+- All numeric promotions are **value-preserving**, which means that the converted value will always be equal to the source value
+- They are also **safe conversions**
+- Compiler will **not issue a warning** when doing so.
+
+### Print function:
+```
+void printInt(int x){
+    std::cout << x << '\n';
+}
+```
+- This function take `int` type input
+- If type conversion would not have existed we would have to overload it for `short`, `char`, `unsigned char`, `signed char`, `unsigned short`, `wchar_t`, `char8_t`, `char16_t`, and `char32_t`
+
+**Resolution** <br>
+We can simply write function which takes `int` or `double` parameter type and the **same code can be called with**  arguments of types that can be numerically promoted to match the types of the function parameters. 
+
+### Allowed Numeric Promotions
+Only the conversions listed in these categories are considered to be numeric promotions:
+1. integral promotions
+2. floating point promotions
+
+## Floating Point Promotions
+A value of type `float` can be converted to a value of type `double`.
+```
+void printDouble(double d)
+{
+    std::cout << d << '\n';
+}
+```
+- We can write a function that takes a double and then call it with either a `double` or a `float` value
+- `float` literal `4.0f` is promoted into a `double`, so that the type of argument matches the type of the function parameter.
 
 
+## Integral promotions
+Rules:
+- `signed char` or `signed short` can be converted to `int`
+- `unsigned char`, `char8_t`, and `unsigned short` can be converted to `int`
+- `bool` can be converted to `int`, with `false` becoming `0` and true becoming `1`.
+
+```
+short s{ 3 }; // there is no short literal suffix, so we'll use a variable for this one
+printInt(s); // numeric promotion of short to int
+
+printInt('a'); // numeric promotion of char to int
+printInt(true); // numeric promotion of bool to int
+```
+
+NOTE : While integral promotion is value-preserving, it **does not necessarily preserve the signedness** (signed/unsigned) of the type.
+
+## Numeric Conversions
+Above we discussed _numeric promotions_ which is basically converting **narrow** numeric types **to** **wider** numeric types (typically `int` or `double`) <br>
+
+5 basic type of numeric conversions:
+1. Converting an integral type to any other integral type - (Mostly demotion and not promotion)
+```
+short s = 3; // convert int to short
+long l = 3; // convert int to long
+char ch = s; // convert short to char------------------------shows warning
+unsigned int u = 3; // convert int to unsigned int
+```
+
+2. Converting a floating point type to any other floating point type 
+```
+float f = 3.0; // convert double to float
+long double ld = 3.0; // convert double to long double
+```
+
+3. Converting a floating point type to any integral type
+```
+int i = 3.5; // convert double to int------------------------shows warning
+```
+
+4. Converting an integral type to any floating point type
+```
+double d = 3; // convert int to double
+```
+5. Converting an integral type or a floating point type to a bool
+```
+bool b1 = 3; // convert int to bool------------------------shows warning
+bool b2 = 3.0; // convert double to bool------------------------shows warning
+```
 
