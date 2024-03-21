@@ -3669,9 +3669,52 @@ int i = 3.0; // okay: will be converted to int value 3 (value preserved)
 int j = 3.5; // data lost: will be converted to int value 3 (fractional value 0.5 lost)
 ```
 
-NOTE : Althoug `int` to `double` is a safe conversion since `int` is a 4 bytes data type and `double` is a 8 bytes data type. But in some architectures where `int` is also 8 bytes it might be a loss conversion. <br>
+NOTE : Althoug `int` to `double` is a safe conversion since `int` is a 4 bytes data type and `double` is a 8 bytes data type. But in some architectures where `int` is also 8 bytes it **might be a lossy conversion**. <br>
 
-NOTE: In assembly language, for converting `int` to `float` value, the integer value is typically first extended or truncated to a specific size (e.g., 32-bit or 64-bit) if necessary, and then converted to a floating-point value.
+NOTE: In assembly language, for converting `int` to `float` value, the integer value is typically first extended or truncated to a specific size (e.g., 32-bit or 64-bit) if necessary, and then converted to a floating-point value. <br>
 
+### Large Range to Small Range
+converting large value to char may show some different output if large number is put:
+```
+int i{ 30000 };
+char c = i; // Shows value as 48 - truncated value
 
+int i2{ 30 };
+char c2 = i2; // shows value 30
+```
+We’ve assigned a large integer to a variable with type char (that has range -128 to 127). This causes the char to overflow, and produces an unexpected result <br>
+
+```
+int i{ 2 };
+short s = i; // convert from int to short
+std::cout << s << '\n';
+
+double d{ 0.1234 };
+float f = d;
+std::cout << f << '\n';
+```
+Converting from a larger integral or floating point type to a smaller type from the same family will generally work so long as the value fits in the range of the smaller type <br>
+
+## Narrowing Conversions
+Types of narrowed conversions:
+1. From a floating point type to an integral type
+2. From a floating point type to a narrower or lesser ranked floating point type
+3. From an integral to a floating point type
+4. From an integral type to another integral type that cannot represent all values of the original type
+
+NOTE: Narrowing conversions should be avoided as much as possible, because they are potentially unsafe
+
+## Safer Narrow Conversions
+It is the **implicit** narrowing conversions which are warned by the compiler, we can instead convert them into **explicit** narrow conversions to avoid warnings using `static_cast` <br>
+
+```
+void someFcn(int i) {}
+
+int main(){
+    double d{ 5.0 };
+    someFcn(d); 			// Gives warnings
+    someFcn(static_cast<int>(d)); 	// Doesn't give warnings
+    return 0;
+}
+```
 
