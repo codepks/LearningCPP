@@ -4313,3 +4313,374 @@ int main() {
 }
 ```
 The function call to `print()` acts as if the user had explicitly called `print(' ')`, which resolves to `print(char)`.
+
+
+## Function Templates
+- This came as a result of **DRY** (don’t repeat yourself) principle. 
+- In a template we can use one or more **placeholder** types. A placeholder type represents some type that is not known at the time the template is written, but that will be provided later
+- Once a template is defined, the **compiler can use the template to generate as many overloaded functions** (or classes) as needed, each using different actual types!
+
+### Types
+C++ supports 3 different kinds of template parameters:
+1. Type template parameters (where the template parameter represents a type).
+2. Non-type template parameters (where the template parameter represents a constexpr value).
+3. Template template parameters (where the template parameter represents a template).
+
+```
+template <typename T> // this is the template parameter declaration
+T max(T x, T y) // this is the function template definition for max<T>
+{
+    return (x < y) ? y : x;
+}
+```
+
+NOTE : There is no difference between the `typename` and `class` keywords in this context. But `class` keyword is older. 
+
+### Naming Convention
+We can use these conventions to name `T` in place:
+1. Starting with a capital letter (e.g. `Allocator`). The standard library uses this naming convention.
+2. refixed with a T, then starting with a capital letter (e.g. `TAllocator`)
+
+### Function Template Initilization
+```
+max<int>(1, 2)
+```
+The process of creating functions (with specific types) from function templates (with template types) is called **function template instantiation** <br>
+
+The result of compilation looks like this for `max<int>(1, 2)`:
+```
+template <typename T>
+T max(T x, T y);
+
+template<>
+int max<int>(int x, int y) // the generated function max<int>(int, int)
+{
+    return (x < y) ? y : x;
+}
+```
+### Tempalte Argument Deduction
+We can let the compiler deduce the type from the function call too:
+```
+template <class T> 
+T max(T x, T y) {
+    return (x < y) ? y : x;
+}
+
+int main(){
+	std::cout << max<>(2, 3); //int type template would be called 
+	std::cout << max(2, 3); //int template and non-template type would be called 
+    	std::cout << max(2.3, 3.5); //float template and non-template  type would be called
+}
+```
+- In `max<>()` case the compiler will consider only template functions
+- In `max()` case the compiler will consider both template and non-template functions. It can call `max(int, int)`
+if present.
+
+**Best practice** : Favor the normal function call syntax when making calls to a function instantiated from a function template. <br>
+
+### Template with non template params
+```
+template <typename T>
+int someFcn (T, double){
+    return 5;
+}
+```
+
+T can vary but 2nd parameter needs to be `float` or `double` value
+
+### non-working situations
+```
+template <typename T>
+T addOne(T x){
+    return x + 1;
+}
+int main()
+{
+    std::string hello { "Hello, world!" };
+    std::cout << addOne(hello) << '\n';
+}
+```
+`string-type + 1` wouldn't work here
+
+### Semantical issues
+```
+template <typename T>
+T addOne(T x){
+    return x + 1;
+}
+
+int main(){
+    std::cout << addOne("Hello, world!") << '\n';
+    return 0;
+}
+```
+OUTPUT
+```
+ello, world!
+```
+The compiler does not have any way to check that such a function actually makes sense semantically. <br>
+
+**SOLUTION** <br>
+We can avoid this situation by using `=delete` operator
+```
+template <typename T>
+T addOne(T x) {
+    return x + 1;
+}
+
+// Use function template specialization to tell the compiler that addOne(const char*) should emit a compilation error
+// const char* will match a string literal
+template <>
+const char* addOne(const char* x) = delete;
+
+int main(){
+    std::cout << addOne("Hello, world!") << '\n'; // compile error
+}
+```
+
+### Multiple file usage
+Multiple file usage of template functions doesn't work the same way as non-template functions. <br>
+**Header.h**
+```
+template <typename T>
+T addOne(T x);
+```
+**Source.cpp**
+```
+#include "Header.h"
+template<typename T>
+T addOne(T x) {
+    return x + 1;
+}
+```
+**main.cpp**
+```
+#include <iostream>
+#include "Header.h"
+
+int main(){
+    std::cout << addOne(2);
+}
+
+```
+
+The code above gives **linker error** as compiler doesn't see any definition os addOne template anywhere even in `source.cpp`. 
+
+**SOLUTION** <br>
+Conventional way to use template in mutliple files is
+- Define template functions in header files only
+- And they don't violate ODR as they are **implicitly inline**
+
+**EXAMPLE 1** <br>
+**Header.h**
+```
+template <typename T>
+T addOne(T x) {// function template definition
+    return x + 1;
+}
+
+```
+**Source.cpp**
+```
+#include "add.h" // import the function template definition
+int main(){
+    std::cout << addOne(1) << '\n';
+}
+```
+**EXAMPLE 2** <br>
+**max.h**
+```
+template <typename T>
+T max(T x, T y){
+    return (x < y) ? y : x;
+}
+```
+**foo.cpp**
+```
+#include "max.h" // import template definition for max<T>(T, T)
+void foo(){
+	std::cout << max(3, 2) << '\n';
+}
+```
+**main.cpp**
+```
+#include "max.h" // import template definition for max<T>(T, T)
+void foo(); // forward declaration for function foo
+
+int main(){
+    std::cout << max(3, 5) << '\n';
+    foo();
+}
+```
+
+As you can see we are still going with defining non-template functions in `.cpp` files but template but tempalte functions would be defined in `.h` files only.
+
+### Downsides
+1. First, the compiler will create (and compile) a function for each function call with a unique set of argument types. So while function templates are compact to write, they can expand into a crazy amount of code, which **can lead to code bloat and slow compile times**.
+2. The bigger downside of function templates is that they tend to produce crazy-looking, borderline unreadable error messages that are much **harder to decipher** than those of regular functions.
+
+## Multiple template type Functions
+```
+#include <iostream>
+
+template <typename T>
+T max(T x, T y)
+{
+    return (x < y) ? y : x;
+}
+
+int main(){
+    std::cout << max(2, 3.5) << '\n';  // compile error
+}
+```
+
+- The code above generates compilation error
+- If we are wondering that type conversion could happen then we should remember that **type conversion** is only taken care in function overload and **not template type deduction.**
+
+**SOLUTION** <br>
+1. Use static_cast
+2. Provide explicit type template argument
+```
+template <typename T>
+T max(T x, T y){
+    return (x < y) ? y : x;
+}
+
+int main(){
+    // we've explicitly specified type double, so the compiler won't use template argument deduction
+    std::cout << max<int>(2, 3.5) << '\n';  //This would give data loss warnings
+    std::cout << max<double>(2, 3.5) << '\n'; // Here int parameter will be implicitly converted to a double.
+    return 0;
+}
+```
+3. Multiple Template type parameters
+```
+template <typename T, typename U> // We're using two template type parameters named T and U
+T max(T x, U y) {// x can resolve to type T, and y can resolve to type U
+    return (x < y) ? y : x; // uh oh, we have a narrowing conversion problem here
+}
+
+int main(){
+    std::cout << max(2, 3.5) << '\n';
+}
+```
+**ISSUES with this code:** <br>
+- The ternary operator would return `double` as `double` has higher precedance over `int` but the return type is set to `int` and it will give **data loss warnings**
+- Even if we make it `U`, we can still flip the arguments to make the situation same
+- Best is to use `auto` keyword
+```
+template <typename T, typename U>
+auto max(T x, U y){
+    return (x < y) ? y : x;
+}
+```
+4. Abbreviated function templates
+When the **auto** keyword is used as a parameter type in a normal function, the compiler will **automatically convert the function into a function template** with each auto parameter becoming an independent template type parameter.
+```
+auto max(auto x, auto y)
+{
+    return (x < y) ? y : x;
+}
+```
+which is the same as the `max` function template we wrote above.
+
+
+## Non-template type parameters
+A non-type template parameter can be any of the following types:
+```
+An integral type
+An enumeration type
+std::nullptr_t
+A floating point type (since C++20)
+A pointer or reference to an object
+A pointer or reference to a function
+A pointer or reference to a member function
+A literal class type (since C++20)
+```
+**Example 1**
+```
+std::bitset<8> bits{ 0b0000'0101 }; // The <8> is a non-type template parameter
+```
+**Example 2**
+```
+template <int N> // declare a non-type template parameter of type int named N
+void print(){
+    std::cout << N << '\n'; // use value of N here
+}
+
+int main(){
+    print<5>(); // 5 is our non-type template argument
+}
+```
+
+### Usage
+```
+double getSqrt(double d){
+    assert(d >= 0.0 && "getSqrt(): d must be non-negative");
+    // The assert above will probably be compiled out in non-debug builds
+    if (d >= 0)
+        return std::sqrt(d);
+
+    return 0.0;
+}
+
+int main(){
+    std::cout << getSqrt(5.0) << '\n';
+    std::cout << getSqrt(-5.0) << '\n';
+}
+```
+- The code above will give assertions only in run time.
+- But if we want to have assertions in compile time we need to use `static_assert` so that these errors woudl be caught at compile time.
+- But for `static_assert` we need `constexpr` which can't do for function parameters
+- We will chose non-template type parameters instead
+
+```
+template <double D> // requires C++20 for floating point non-type parameters
+double getSqrt(){
+    static_assert(D >= 0.0, "getSqrt(): D must be non-negative");
+    if constexpr (D >= 0) // ignore the constexpr here for this example
+        return std::sqrt(D); // strangely, std::sqrt isn't a constexpr function (until C++26)
+    return 0.0;
+}
+
+int main(){
+    std::cout << getSqrt<5.0>() << '\n';
+    std::cout << getSqrt<-5.0>() << '\n'; //generates error for this
+}
+```
+**NOTE** :Non-type template parameters are used primarily when we need to pass constexpr values to functions (or class types) so they can be used in contexts that require a constant expression.
+
+### Implicit Conversions
+**If a function template is overloaded** for different kinds of non-type template parameters, it can very easily result in an **ambiguous** match
+```
+template <int N> // int non-type template parameter
+void print(){
+    std::cout << N << '\n';
+}
+
+template <char N> // char non-type template parameter
+void print(){
+    std::cout << N << '\n';
+}
+
+int main(){
+    print<5>();   // ambiguous match with int N = 5 and char N = 5
+    print<'c'>(); // ambiguous match with int N = 99 and char N = 'c'
+}
+```
+
+### Using auto
+```
+#include <iostream>
+
+template <auto N> // deduce non-type template parameter from template argument
+void print(){
+    std::cout << N << '\n';
+}
+
+int main(){
+    print<5>();   // N deduced as int `5`
+    print<'c'>(); // N deduced as char `c`
+}
+```
+n this case, there is only **one function template**, so there is no possible ambiguity.
