@@ -4696,3 +4696,132 @@ Compound data types (also sometimes called composite data types) are data types 
 5. Reference types: `L-value references`, `R-value references`
 6. Enumerated types: `Unscoped enumerations`, `Scoped enumerations`
 7. Class types: `Structs`, `Classes`, `Unions`
+
+## lvalue and rvalue
+```
+ ++x; // This expression statement has the side-effect of incrementing x
+```
+Besides producing values and side effects, expressions can do one more thing: **they can evaluate to objects or functions**. 
+
+### Properties of expressions
+All expressions in C++ have two properties: 
+1. a type
+2. a value category
+
+### The TYPE of an expression
+The compiler can use the type of an expression to determine whether an expression is valid in a given context. <br>
+**Example 1**
+```
+auto v1 { 12 / 4 }  //valid
+```
+**Example 2 **
+```
+void print(int x){
+    std::cout << x << '\n';
+}
+print("foo");  //invalid
+```
+
+**Type** of an expression must be determinable at compile time and the **value** of an expression may be determined at either compile time.
+
+### VALUE of expression
+```
+x = 5; // valid: we can assign 5 to x
+5 = x; // error: can not assign value of x to literal value 5
+```
+**QUESTION** : How does the compiler know which expressions can legally appear on either side of an assignment statement? <br>
+**ANSWER** :The answer lies in the second property of expressions: `the value category` <br>
+The value category of an expression (or subexpression) indicates whether an expression resolves to `a value`, `a function`, or `an object` of some kind.
+- Expressions on the **left hand side** can only be `lvalue` something what has name and address and is modifiable.
+- `5` cannot be on the left hand side as it is not modifiable
+- The expression on the **right-hand side** of the assignment operator can be either an lvalue or an rvalue.
+- If the right-hand side expression is an lvalue, it is implicitly converted to an rvalue by creating a temporary copy.
+
+### Lvalue and Rvalue expressions
+**LVALUE**
+- **lValue** is an expression that evaluates to an identifiable `object` or `function` (or `bit-field`)
+-  lvalues come in two subtypes: `modifiable lvalue` and `non-modifiable lvalue` like `const` variables
+-  _Lvalue expressions evaluate to an identifiable object._
+
+**RVALUE**
+- `r-value` is an expression that is not an lvalue
+- Rvalue expressions evaluate to a `value`
+-  Commonly seen rvalues include `literals`, `return value of functions`, `operators that return by value`
+-  Examples are `return5()`, `x + 1`, and `static_cast<int>(d)` as **they produce temprary values**.
+-  _Rvalue expressions evaluate to a value._
+
+**TIP**: <br>
+If you’re not sure whether an expression is an lvalue or rvalue, try taking its address using `operator&`, which requires its operand to be an lvalue. If &(expression); compiles, expression must be an lvalue. <br>
+
+**INSIGHT - C-STYLE STRINGs**<br>
+
+A C-style string literal is an constant **lvalue** because C-style strings (which are C-style arrays) decay to a pointer. If the array were an rvalue (a temporary value without an address), it wouldn't be possible to obtain a pointer to its first element.<br>
+Even though the string literal itself is a temporary array, it is considered an lvalue so that the array-to-pointer decay can occur, allowing expressions like `"hello"` to be implicitly converted to a pointer to its first character `(char*)`.<br>
+
+### lValue to rValue conversion
+```
+int x { 5 };
+int y { x };
+```
+- lvalue expressions will implicitly convert to rvalue expressions in contexts where an rvalue is expected but an lvalue is provided.
+-  lvalue expression x undergoes an lvalue-to-rvalue conversion, which evaluates to value 5, which is then used to initialize y
+
+### Identifying lvalue and rValue
+- **Lvalue** expressions are those that evaluate to variables or other identifiable objects that persist beyond the end of the expression
+- **Rvalue** expressions are those that evaluate to literals or values returned by functions/operators that are discarded at the end of the expression.
+
+## lValue Reference
+- In C++, a **reference** is an alias for an existing object
+- A reference is essentially identical to the object being referenced
+- We use `&` to denote a reference
+<br>
+**Types**
+  1. lvalue reference
+  2. rvalue reference
+
+### reference variables
+lvalue reference variable is a variable that acts as a reference to an lvalue <br>	
+```
+int x { 5 };
+int& ref { x };
+```
+When a reference is initialized with an object (or function), we say it is **bound** to that object also called as **reference binding**.
+- We can bind to only modifiable value and not const value
+```
+int x { 5 };
+int& ref { x }; // valid: lvalue reference bound to a modifiable lvalue
+
+const int y { 5 };
+int& invalidRef { y };  // invalid: can't bind to a non-modifiable lvalue
+```
+Lvalue references can’t be bound to non-modifiable lvalues or rvalues (otherwise you’d be able to change those values through the reference, which would be a **violation of their const-ness**). <br>
+<br>
+**type** of the reference must match the type of the referent<br>
+```
+int x { 5 };
+int& ref { x }; // okay: reference to int is bound to int variable
+
+double y { 6.0 };
+int& invalidRef { y };
+```
+- Reference **cannot** be changed to reference another object once initialized.
+### Scope
+- It has same scope as normal variables
+- Reference can be destroyed before the object it is referring to
+```
+int x { 5 };
+
+{
+int& ref { x };   // ref is a reference to x
+std::cout << ref << '\n'; // prints value of ref (5)
+} // ref is destroyed here -- x is unaware of this
+```
+### Dangling references
+When an object being referenced is destroyed before a reference to it, the reference is left referencing an object that no longer exists.
+```
+const std::string& getProgramName(){
+    const std::string programName { "Calculator" }; // now a non-static local variable, destroyed when function ends
+    return programName;
+}
+```
+The function call above leads to undefined behaviour. 
