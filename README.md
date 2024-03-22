@@ -3781,3 +3781,134 @@ double d { static_cast<double>(n)};
 constexpr int n{ 5 };
 double d {n);
 ```
+
+## Arithmatic Conversions
+```
+int x { 2 + 3.5 };
+```
+- Here both are of different type.
+- In C++, certain operators require that their operands be of the same type
+- If one of these operators is invoked with operands of different types, one or both of the operands will be **implicitly converted to matching types**
+
+[source](https://www.learncpp.com/cpp-tutorial/arithmetic-conversions/)
+
+
+## Type casting
+Need:
+```
+int x { 10 };
+int y { 4 };
+double d = x / y; // does integer division, initializes d with value 2.0
+```
+How to tell the compiler that we want to have the floating division here to get output as `2.5` instead of `2.0`?  <br>
+
+### Casting types
+1. C-style casts
+2. static casts
+3. const casts---------------should be avoided
+4. dynamic casts
+5. reinterpret casts---------should be avoided
+
+
+### C-Style casts
+```
+double d { (double)x / y }
+//OR
+double d { double(x) / y };
+```
+The problem can be solved like this as it was generally used in `C` language. <br>
+
+**Disadvantages** :<br>
+C-Syle cast handles mutliple kinds of cast like `static_cast`, `const_cast`, `reinterpret_cast` depending on the context and anytime and this is the undefined behaviour with the c-style cast. Inidividual casts are more defined.
+
+
+### static_cast
+It takes the value inside the paranthesis to convert it to the value inside the `<>` brackets.
+```
+double d { static_cast<double>(x) / y };
+```
+Usage: <br>
+1. static_cast is best used to **convert one fundamental type** into another
+2. To avoid warnings in narrowing conversions
+
+## typedefs and typealiases
+
+### using keyword
+It is used to create aliases for for existing datatype. <br>
+```
+using Distance = double;
+Distance milesToDestination{ 3.4 };
+```
+Type aliases are not type safe. <br>
+If you need to use one or more type aliases across multiple files, they can be defined in a header file and #included into any code files that needs to use the definition: <br>
+```
+#ifndef MYTYPES_H
+#define MYTYPES_H
+
+    using Miles = long;
+    using Speed = long;
+
+#endif
+```
+
+### Strong typedefs
+Some languages support the concept of a strong typedef (or strong type alias). A strong typedef actually creates a new type that has all the original properties of the original type, but the compiler will throw an error if you try to mix values of the aliased type. <br>
+But there are quite a few 3rd party C++ libraries that implement strong typedef-like behavior. <br>
+
+### Typedefs
+A typedef (which is short for “type definition”) is an **older way** of creating an alias for a type.<br>
+```
+typedef double Distance
+```
+In typedef, type comes first and then the alias. <br>
+Typedef sometimes can be confusing to work with for e.g.
+```
+typedef int (*FcnType)(double, char); // FcnType hard to find
+using FcnType = int(*)(double, char); // FcnType easier to find
+```
+In the above typedef definition, the name of the new type (FcnType) is **buried in the middle of the definition**, whereas in the type alias, the name of the new type and the rest of the definition are separated by an equals sign.
+
+### Usage 1 
+Sometimes it is used for platform independent coding as char, short and int might have varying size in different architectures, we can utilize type-aliases in aliasing them to names like `int8_t`, `int16_t` and `int32_t` bases on architure used:
+```
+#ifdef INT_2_BYTES
+  using int8_t = char;
+  using int16_t = int;
+  using int32_t = long;
+#else
+  using int8_t = char;
+  using int16_t = short;
+  using int32_t = int;
+#endif
+```
+In fact, The fixed-width integer types (such as `std::int16_t` and `std::uint32_t`) are actually just type **aliases to various fundamental types.** To prove this :
+```
+std::int8_t x{ 97 }; // int8_t is usually a typedef for signed char
+std::cout << x << '\n';
+```
+When you print an **8-bit fixed-width** integer using `std::cout`, you’re likely to get a character value. Because `std::int8_t` is typically a typedef for `signed char`, variable `x` will likely be defined as a `signed char`. And char types print their values as ASCII characters rather than as integer values.
+
+## Usage 2
+```
+bool hasDuplicates(std::vector<std::pair<std::string, int>> pairlist){
+    // some code here
+    return false;
+}
+```
+Using `std::vector<std::pair<std::string, int>>` everywhere would make our code cumbersome. Instead we can use type alias over here:
+```
+using VectPairSI = std::vector<std::pair<std::string, int>>;
+```
+To make the function easier to read now:
+```
+bool hasDuplicates(VectPairSI pairlist) {
+    // some code here
+    return false;
+}
+```
+
+
+
+
+
+
