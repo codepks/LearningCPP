@@ -3907,6 +3907,161 @@ bool hasDuplicates(VectPairSI pairlist) {
 }
 ```
 
+### Usage 3
+We can use type alias to make the cod emore meaningful
+```
+int gradeTest();
+```
+Here return type is `int`, instead we can use a typealias to make the return type more meaningful
+```
+using TestScore = int;
+TestScore gradeTest();
+```
+Creating a type alias just to document the return type of a single function isn’t worth it (**use a comment instead**).
+
+### Usage 4
+Code maintainance: <br>
+For example, if you were using a `short` to hold a student’s ID number, but then later decided you needed a `long` instead. <br>
+Then changing types becomes as simple as updating the type alias (e.g. from `using StudentId = short;` to using `StudentId = long;`
+
+### Downside
+Obscuring the type information can also be harmful to understanding how the type should be expected to work.
+
+## Auto Keyword
+Type deduction (also sometimes called type inference) is a feature that allows the compiler to deduce the type of an object from the object’s initializer.
+```
+auto d{ 5.0 }; // 5.0 is a double literal, so d will be type double
+auto i{ 1 + 2 }; // 1 + 2 evaluates to an int, so i will be type int
+auto x { i }; // i is an int, so x will be type int too
+```
+It **doesn't work** for uninitialized variables and void return types
+```
+void foo() { }
+auto x;          // The compiler is unable to deduce the type of x
+auto y{ };       // The compiler is unable to deduce the type of y
+auto z{ foo() }; // z can't have type void, so this is invalid
+```
+### with const and constexpr
+Prefix with const and constexpr
+```
+constexpr auto z { x }; // z will be type constexpr int (constexpr is reapplied)
+```
+### with string literals
+For constant strings, it would be `const char*` and not `std::string`
+```
+auto s { "Hello, world" }; // s will be type const char*, not std::string
+```
+If you want the type deduced from a string literal to be `std::string` or `std::string_view`, you’ll need to use the `s` or `sv` literal suffixes
+```
+auto s1 { "goo"s };  // "goo"s is a std::string literal, so s1 will be deduced as a std::string
+auto s2 { "moo"sv }; // "moo"sv is a std::string_view literal, so s2 will be deduced as a std::string_view
+```
+But in such cases, it may be **better to not use** type deduction.
+
+### Benefits
+1. Easier to read
+2. Requires initilization as a good practice
+3. Helps with skipping string initilization and avoidin conversions in some cases
+```
+std::string_view getString();   // some function that returns a std::string_view
+std::string s1 { getString() }; // bad: expensive conversion from std::string_view to std::string 
+auto s2 { getString() };        // good: no conversion required
+```
+### Downside
+```
+auto sum { add(5, 6) + gravity };
+```
+gravity in the above case carries a floating value, add(5,6) returning int would also convert to floating value due to float having **higher conversion strengh** over int and then the return type of sum would also be floating value. <br>
+The user might have expect to be int but `auto` deduces it to be `float`.
+
+## Function type deduction
+In `C++14`, the `auto` keyword was extended to do function return type deduction.
+```
+auto add(int x, int y){
+    return x + y;
+}
+```
+### Downdisde 1
+While using auto, all the branches of `if` or `else` should always return same data type, else error would be introduced
+```
+auto someFcn(bool b){
+    if (b)
+        return 5; // returns type int
+    else
+        return 6.7; // returns type double and produces error
+}
+int main(){
+    auto val = someFcn(true);
+}
+```
+**HUSTLE** Let's resolve the above issue using ternary operator
+```
+auto someFcn(bool b) { return b ? 5 : 6.7; }
+
+int main() {
+    auto val = someFcn(true); // val is an int with value 5
+    return 0;
+}
+```
+In above resolution, ternary operator always makes sure that same datatype would be returned, just like `+` or '`-` operator works with same data type only and in case of different data type it perform numerical promotion. <br>
+Similary here, `5` being `int` data type would be numerically promoted to `float` and now ternary operator would be returning `5.0` instead. <br>
+One can even use static_cast to cast either of the return types.
+
+### Downside 2
+Until `C++ 20`, we could not use `auto` for function parameters.
+```
+void addAndPrint(auto x, auto y){
+    std::cout << x + y << '\n';
+}
+int main(){
+    addAndPrint(2, 3); // case 1: call addAndPrint with int parameters
+    addAndPrint(4.5, 6.7); // case 2: call addAndPrint with double parameters
+
+    return 0;
+}
+```
+The above code would work in `C++20` and here `auto` would triggering the `function templates` functionality
+### Downside 3
+It can only be used for function which are local to a file and **not have forward declations in header** and definitions elsewhere. For e.g., the code below gives error:
+```
+auto foo();
+
+int main(){
+    std::cout << foo() << '\n'; // the compiler has only seen a forward declaration at this point
+    return 0;
+}
+
+auto foo() { return 5; } // To resolve this one needs to move this function above the main function
+```
+Normal functions that return auto are typically only callable from within the file in which they are defined. 
+
+### Trailing return type
+To resolve the issue above we can use trailing return type:<br>
+**add.h**
+```
+auto add() -> int;
+```
+**add.cpp**
+```
+#include "Header.h"
+auto add() -> int {
+    return 5;
+}
+```
+**main.cpp**
+```
+#include "Header.h"
+
+int main(){
+    std::cout << add() << '\n'; 
+    return 0;
+}
+```
+
+Just like `add` in `add.h` we can add make other function prototypes to work with `auto` and `trailing return type`.
+
+
+
 
 
 
