@@ -4126,9 +4126,9 @@ void print(const int) { }
 print(x); // x trivially converted to const int
 ```
 Example 1 : `non-const` type can be trivially converted to a `const` type
-
+<br><br>
 Example 2 : `non-reference` type to a `reference` type  and vice-versa
-
+<br><br>
 3. If no exact match is found, the compiler tries to find a match by applying **numeric promotion** to the argument(s). E.g. `int` or `double`
 ```
 void print(int) { }
@@ -4140,6 +4140,7 @@ int main(){
     print(4.5f); // promoted to match print(double)
 }
 ```
+<br><br>
 4. If no match is found still, then compiler starts applying **numeric conversions**
 ```
 void print(double) { }
@@ -4149,7 +4150,7 @@ int main(){
     return 0;
 }
 ```
-**NOTE** : Matches made by applying numeric promotions take **precedence** over any matches made by applying numeric conversions.
+**NOTE** : Matches made by applying numeric promotions take **precedence** over any matches made by applying numeric conversions. <br><br>
 5. If it is still not a match then compiler relies on **user defined conversions**
 ```
 class X 
@@ -4167,7 +4168,7 @@ int main(){
     return 0;
 }
 ```
-If `print(int)` is also not defined then `print(double)` gets called due to numerical promotion.
+If `print(int)` is also not defined then `print(double)` gets called due to numerical promotion.<br><br>
 
 6. If no match is found via user-defined conversion, the compiler will look for a matching function that uses **ellipsis**.
 7. Else **GIVE-UP**
