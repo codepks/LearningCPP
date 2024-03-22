@@ -4169,7 +4169,7 @@ int main(){
 }
 ```
 If `print(int)` is also not defined then `print(double)` gets called due to numerical promotion.<br><br>
-
-6. If no match is found via user-defined conversion, the compiler will look for a matching function that uses **ellipsis**.
+<br><br>
+6. If no match is found via user-defined conversion, the compiler will look for a matching function that uses **ellipsis**.<br><br>
 7. Else **GIVE-UP**
 
