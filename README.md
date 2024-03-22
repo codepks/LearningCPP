@@ -4108,12 +4108,12 @@ int getRandomValue();
 double getRandomValue();
 ```
 
-## Name Mangling
+### Name Mangling
 - The compiler mangles the name base on **number** and **type** of parameters, so that the linker has unique names to work with.
 - `int fcn()` might compile to name `__fcn_v`, whereas `int fcn(int)` might compile to name `__fcn_i`
 
 
-## Overload Resolution
+### Overload Resolution
 - With overloaded functions, there can be many functions that can potentially **match a function call**
 - The process of matching function calls to a specific overloaded function is called overload resolution
   
@@ -4172,4 +4172,105 @@ If `print(int)` is also not defined then `print(double)` gets called due to nume
 <br><br>
 6. If no match is found via user-defined conversion, the compiler will look for a matching function that uses **ellipsis**.<br><br>
 7. Else **GIVE-UP**
+
+### Ambiguos Conversions
+An ambiguous match occurs when the compiler finds two or more functions that can be made to match in the same step. <br>
+**Example 1**
+```
+void print(int) { }
+void print(double) { }
+
+int main(){
+    print(5L); // 5L is type long
+    return 0;
+}
+```
+`5L` is of type `long`: 
+1. The compiler would first look for exact match `print(long)`
+2. Then will **try for numeric promotion** but `long` cannot be promoted since promotion are for narrow to wider datatype
+3. The compiler will try to find a match by applying **numeric conversions** to the `long` argument.
+4. If the long argument is numerically converted into an `int`, then the function call will match `print(int)`
+5. If the long argument is instead converted into a `double`, then it will match `print(double)` instead
+
+**Example 2**
+```
+void print(unsigned int) { }
+void print(float) { }
+
+int main(){
+    print(0); // int can be numerically converted to unsigned int or to float
+    print(3.14159); // double can be numerically converted to unsigned int or to float
+}
+```
+- We might expect `0` to resolve to `print(unsigned int)` and `3.14159` to resolve to `print(float)`
+- Since the `int` value `0` can be numerically converted to either an `unsigned int` or a `float`, so either overload matches equally well, and the result is an ambiguous function call.
+- The same applies for the conversion of a `double` to either a `float` or `unsigned int`
+
+### Resolving Ambiguous Matches
+1. Make an exact overloading function
+2. Static_cast the argument to match the existing function parameter
+3. In case of constact initilizer, use the literal suffix to match function parameter
+
+### Multiple parameter match
+```
+void print(char, int) { }
+void print(char, double) { }
+void print(char, float) { }
+
+int main(){
+    print('x', 'a');
+}
+```
+
+In the above function case, the 1st parameter is matched in all the cases, but for 2nd parameter is best matched in case of `print(char,int)`
+
+## Deleting Function
+### =delete specifier
+```
+void printInt(int x) { }
+
+int main() {
+    printInt(5);    // okay: prints 5
+    printInt('a');  // prints 97 -- does this make sense?
+    printInt(true); // print 1 -- does this make sense?
+}
+```
+
+Suppose if you don't want the `printInt(char)` and `printInt(bool)` to be invoked (if they are stopped at the first place then further `printInt(int)` would't be converted via number conversion) then you can delete the `printInt(char)` and `printInt(bool)` functions.
+
+```
+void printInt(int x) { }
+void printInt(char) = delete; // calls to this function will halt compilation
+void printInt(bool) = delete; // calls to this function will halt compilation
+
+int main() {
+    printInt(97);   // okay
+    printInt('a');  // compile error: function deleted
+    printInt(true); // compile error: function deleted
+}
+```
+Now the deleted function function calls would give compilation error. <br><br>
+```
+printInt(5.0);
+```
+Suprisingly the code above will give ambiguos compilation error. <br>
+- First, the compiler checks to see if exact match `printInt(double)` exists. It does not.
+- All the printInt(int/bool/char) are considered good match after implcit conversions
+- Since both all of them are viable candidates(even if they are deleted functions), the compiler cannot choose between them, resulting in an "ambiguous match" error. <br><br>
+
+### Delete all non-matching overloads
+If we want to consider only one type of data-type to be matched and rest all to be ignored even for implicit conversions then we can use templates to delete all of them
+```
+void printInt(int x) { }
+
+template <typename T>
+void printInt(T x) = delete;
+
+int main() {
+    printInt(97);   // okay
+    printInt('a');  // compile error
+    printInt(true); // compile error
+}
+```
+the above code takes only `printInt(int)` and not other overloads.
 
