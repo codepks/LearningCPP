@@ -4061,9 +4061,114 @@ int main(){
 Just like `add` in `add.h` we can add make other function prototypes to work with `auto` and `trailing return type`.
 
 
+# Function Overloading
+## Need
+```
+int addInteger(int x, int y){
+    return x + y;
+}
+```
+- Suppose if we want to pass float value to this function instead of integer
+- Doing so we would see loss of precision
+- To help we this we can do function overload by creating the same named function with `double` type parameter 
+```
+double add(double x, double y){
+    return x + y;
+}
+```
+NOTE : function’s **return type is not used** to differentiate overloaded functions.
+
+## Factors consideres in overloading
+1. Number of parameters - YES
+2. Types of parameter - YES
+3. Return type - NO
+4. Ellipsis
+5. Const or Volative (in member functions) - YES
+6. Ref-Qualifierrs (in member function) - YES
+
+### Taken care of 
+1. Ellipses
+```
+void foo(int x, int y);
+void foo(int x, ...); //differentiated from foo(int, int)
+```
+2. Function Signatures : return type is not included in the function signature
+ (a) function name (b)number of parameters (c) parameter type (d) function-level qualifiers
 
 
+### Not taken care
+1. `const` qualifier
+```
+void print(int);
+void print(const int); // not differentiated from print(int)
+```
+2. Return type
+```
+int getRandomValue();
+double getRandomValue();
+```
+
+## Name Mangling
+- The compiler mangles the name base on **number** and **type** of parameters, so that the linker has unique names to work with.
+- `int fcn()` might compile to name `__fcn_v`, whereas `int fcn(int)` might compile to name `__fcn_i`
 
 
+## Overload Resolution
+- With overloaded functions, there can be many functions that can potentially **match a function call**
+- The process of matching function calls to a specific overloaded function is called overload resolution
+  
+Overload match is resolved in steps:
+1. A single matching function was found. This function is considered to be the best match
 
+2. If match not found then apply a bunch of **trivial conversions** to the argument to find the match. Matches made via the trivial conversions are considered exact matches.
+```
+void print(const int) { }
+print(x); // x trivially converted to const int
+```
+Example 1 : `non-const` type can be trivially converted to a `const` type
+
+Example 2 : `non-reference` type to a `reference` type  and vice-versa
+
+3. If no exact match is found, the compiler tries to find a match by applying **numeric promotion** to the argument(s). E.g. `int` or `double`
+```
+void print(int) { }
+void print(double) { }
+
+int main(){
+    print('a'); // promoted to match print(int)
+    print(true); // promoted to match print(int)
+    print(4.5f); // promoted to match print(double)
+}
+```
+4. If no match is found still, then compiler starts applying **numeric conversions**
+```
+void print(double) { }
+void print(std::string) { }
+int main(){
+    print('a'); // 'a' converted to match print(double)
+    return 0;
+}
+```
+**NOTE** : Matches made by applying numeric promotions take **precedence** over any matches made by applying numeric conversions.
+5. If it is still not a match then compiler relies on **user defined conversions**
+```
+class X 
+{
+public:
+    operator int() { return 0; } // Here's a user-defined conversion from X to int
+};
+
+void print(int) { } //this would be called
+void print(double) { } 
+
+int main(){
+    X x; 
+    print(x); // x is converted to type int using the user-defined conversion from X to int
+    return 0;
+}
+```
+If `print(int)` is also not defined then `print(double)` gets called due to numerical promotion.
+
+6. If no match is found via user-defined conversion, the compiler will look for a matching function that uses **ellipsis**.
+7. Else **GIVE-UP**
 
