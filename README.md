@@ -4020,7 +4020,7 @@ int main(){
     return 0;
 }
 ```
-The above code would work in `C++20` and here `auto` would triggering the `function templates` functionality
+The above code would work in `C++20` and here `auto` would triggering the `function templates` functionality to handle such cases.
 ### Downside 3
 It can only be used for function which are local to a file and **not have forward declations in header** and definitions elsewhere. For e.g., the code below gives error:
 ```
