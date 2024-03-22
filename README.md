@@ -4683,4 +4683,27 @@ int main(){
     print<'c'>(); // N deduced as char `c`
 }
 ```
-n this case, there is only **one function template**, so there is no possible ambiguity.
+In this case, there is only **one function template**, so there is no possible ambiguity.
+
+
+# References and Pointers
+## Introduction
+Compound data types (also sometimes called composite data types) are data types that can be constructed from fundamental data types.
+1. Functions
+2. Arrays
+3. Pointer types:
+	Pointer to object
+	Pointer to function
+4. Pointer to member types:
+	Pointer to data member
+	Pointer to member function
+5. Reference types:
+	L-value references
+	R-value references
+6. Enumerated types:
+	Unscoped enumerations
+	Scoped enumerations
+7. Class types:
+	Structs
+	Classes
+	Unions
