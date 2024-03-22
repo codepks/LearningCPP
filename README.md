@@ -4274,3 +4274,42 @@ int main() {
 ```
 the above code takes only `printInt(int)` and not other overloads.
 
+## Default Arguments
+- Default arguments are handled by the compiler at the call site
+- Only `=` operator can be used and not `{}` initializer
+
+
+Rules of setting default arguments:
+1. Explicitly provided arguments must be the leftmost arguments (arguments with defaults cannot be skipped)
+```
+print();           // okay: both arguments defaulted
+print("Macaroni"); // okay: d defaults to 10.0
+print(20.0);       // error: does not match above function (cannot skip argument for sv)
+```
+We cannot start from middle or right, start from left and fill each argument.
+
+2. If a parameter is given a default argument, all subsequent parameters (**to the right) must also be given default arguments.**
+```
+void print(int x=10, int y); // not allowed
+```
+3. The default argument can be declared in **either** the forward declaration or the function definition, but not both. **Best** practice is to declare the default argument **in the forward declaration**
+```
+void print(int x, int y=4); // forward declaration
+
+void print(int x, int y=4) { // error: redefinition of default argument
+    std::cout << "x: " << x << '\n';
+    std::cout << "y: " << y << '\n';
+}
+```
+### Default argument and function overloading
+```
+void print(std::string_view s) { }
+void print(char c = ' ') { }
+
+int main() {
+    print("Hello, world"); // resolves to print(std::string_view)
+    print('a'); // resolves to print(char)
+    print(); // resolves to print(char)
+}
+```
+The function call to `print()` acts as if the user had explicitly called `print(' ')`, which resolves to `print(char)`.
