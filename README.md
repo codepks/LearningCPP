@@ -5634,7 +5634,7 @@ Reason : `ptr4` has type `std::string*`, and we can’t initialize a `std::strin
 
 ### auto and const pointers
 For `auto` : <br>
-**Working** :** Apply `const` to the deduced type**.  So in the case of `ptr1` and `ptr2`, the deduced type is `std::string*`, and then const is applied, making the final type `std::string* const` :
+**Working** : **Apply `const` to the deduced type**.  So in the case of `ptr1` and `ptr2`, the deduced type is `std::string*`, and then const is applied, making the final type `std::string* const` :
 ```
 const auto ptr1{ getPtr() };  // std::string* const
 auto const ptr2 { getPtr() }; // std::string* const
