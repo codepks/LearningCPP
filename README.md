@@ -4924,3 +4924,253 @@ printValue(5); // error: 5 is an rvalue
 - An object is cheap to copy if it uses 2 or fewer “words” of memory (<= 2 * sizeof(void*))
 - In some places copy by value give compiler oppurtunity to perform move semantics
 
+###  std::string_view over const std::string&
+In most cases, `std::string_view` is the better choice, as it can handle a wider range of argument types efficiently.
+```
+void doSomething(const std::string&);
+void doSomething(std::string_view);   // prefer this in most cases
+```
+**Exceptions** <br>
+If your function needs to call some other function that takes a `C-style string` or `std::string` parameter, then `const std::string&` may be a better choice, as `std::string_view` is not guaranteed to be null-terminated<br>
+
+With a `std::string_view` value parameter, it can handle inexpensively:
+1. std::string
+2. std::string_view
+3. C-style string or string literal
+
+With `const std::string&`, it can handle
+1. `std::string` inexpensively
+2. `std::string_view` needs to be explcitly get converted to `std::string` via static_cast which is expensive
+3. `C-style string` too needs to explcitly convert to `std::string` which is expensive
+
+# Pointers
+## Address of &
+The **address-of operator (&)** returns the memory address of its operand. 
+```
+int x{ 5 };
+std::cout << x << '\n';  // print the value of variable x
+std::cout << &x << '\n'; // print the memory address of variable x
+```
+Memory addresses are typically printed as hexadecimal values
+
+## Deference Operator
+The **dereference operator (*)** returns the value at a given memory address as an lvalue. It is an unary operator.
+```
+std::cout << x << '\n';  // print the value of variable x
+std::cout << &x << '\n'; // print the memory address of variable x
+std::cout << *(&x) << '\n'; // print the value at the memory address of variable x
+```
+**INSIGHT** <br>
+The address-of operator (`&`) and dereference operator (`*`) work as opposites: address-of gets the address of an object, and _**dereference gets the object**_ at an address.
+```
+int x{ 3 };
+std::cout << &x << std::endl;
+std::cout << *(&x) << std::endl;
+
+*(&x) = 4; //Since * returns lValue, we can make changes inside that lValue
+std::cout << x << std::endl;
+```
+
+## Introduction to Pointers
+A pointer is an object that **holds a memory address** (typically of another variable) as its value.
+
+## Initialization
+1. Pointers are not initilialized by default and due to this they can contain garbage adderss (also called wild pointers)
+2. Dereferencing wild pointers can result in undefined behaviour
+```
+int x{ 5 };
+
+int* ptr;        // an uninitialized pointer (holds a garbage address)
+int* ptr2{};     // a null pointer (we'll discuss these in the next lesson)
+int* ptr3{ &x }; // a pointer initialized with the address of variable x
+```
+Once we have a pointer holding the address of another object, we can then use the dereference operator (*) to **access the lvalue** at that address.
+```
+int x {4};
+  int* ptr{};
+  if(ptr == nullptr)
+      ptr = &x;
+  *ptr = 5;
+```
+**NOTE** : So when we say, “an integer pointer”, we really mean “a pointer to an integer”. <br>
+
+## Pointing to datatype
+The type of the pointer has to match the type of the object being pointed to:
+```
+int i{ 5 };
+double d{ 7.0 };
+
+int* iPtr{ &i };     // ok: a pointer to an int can point to an int object
+int* iPtr2 { &d };   // not okay: a pointer to an int can't point to a double object
+double* dPtr{ &d };  // ok: a pointer to a double can point to a double object
+double* dPtr2{ &i }; // not okay: a pointer to a double can't point to an int object
+```
+
+## Assignment to address and value
+We can use assignment with pointers in two different ways:
+
+1. To change what the pointer is pointing at (by assigning the pointer a new address)
+2. To change the value being pointed at (by assigning the dereferenced pointer a new value)
+
+## Pointers and references
+-  Pointers and references both provide a way to indirectly access another object.
+-  . The primary difference is that with pointers, we need to explicitly get the address to point at, and we have to explicitly dereference the pointer to get the value.
+-  With references, the address-of and dereference happens implicitly.
+-  References must be initialized, pointers are not required to be initialized (but should be).
+-  References are not objects, pointers are.
+-  References can not be reseated (changed to reference something else), pointers can change what they are pointing at.
+-  References must always be bound to an object, pointers can point to nothing
+-  References are “safe” (outside of dangling references), pointers are inherently dangerous
+
+## What does & actually return
+Contrary to belied `&` **doesn't return address** of a variables, instead it actually pointer to that variable, we can know this by using typeid().
+```
+int x{ 4 };
+std::cout << typeid(&x).name();
+```
+**OUTPUT**
+```
+int * __ptr64
+```
+
+## Size of pointers
+Pointer on a 32-bit machine is 32 bits (4 bytes). With a 64-bit executable, a pointer would be 64 bits (8 bytes). Note that this is true regardless of the size of the object being pointed to.
+```
+std::cout << sizeof(chPtr) << '\n'; // prints 4
+std::cout << sizeof(iPtr) << '\n';  // prints 4
+std::cout << sizeof(ldPtr) << '\n'; // prints 4
+```
+A **dangling pointer** is a pointer that is holding the address of an object that is no longer valid.
+
+```
+int x{ 5 };
+int* ptr{ &x };
+std::cout << *ptr << '\n'; // valid
+{
+    int y{ 6 };
+    ptr = &y;
+    std::cout << *ptr << '\n'; // valid
+} // y goes out of scope, and ptr is now dangling
+
+std::cout << *ptr << '\n'; // undefined behavior from dereferencing a dangling pointer
+```
+
+## Null Pointers
+When a pointer is holding a null value, it means the pointer is **not pointing at anything**. <br>
+The easiest way to create a null pointer is to use value initialization:<br>
+```
+int main(){
+    int* ptr {}; // ptr is now a null pointer, and is not holding an address
+    return 0;
+}
+```
+Because we can use assignment to change what a pointer is pointing at, a pointer that is initially set to null can later be changed to point.
+
+
+## nullptr keyword
+```
+int* ptr { nullptr }; // can use nullptr to initialize a pointer to be a null pointer
+```
+
+## dereferencing nummptr
+- Dereferencing nummptr can lead to undefined behaviour or application crash.
+- I would mean “go to the address the pointer is pointing at and access the value there”.
+
+## Checking nullptr
+```
+if (ptr == nullptr)
+  \\something
+
+(nullPtr==nullptr ? "null\n" : "non-null\n");
+```
+**Boolean check**<br>
+Pointers will also implicitly convert to Boolean values: a **null pointer** converts to Boolean value **false**, and a **non-null pointer** converts to Boolean value **true**
+```
+ if (ptr) // implicit conversion to Boolean
+        std::cout << "ptr is non-null\n";
+```
+
+## Checking Dangling pointers
+- There is actually no way to check if the pointers are dangling or not
+- We need to avoid having any dangling pointers in our program in the first place
+- We do that by ensuring that any pointer that is not pointing at a valid object is set to `nullptr`.
+
+**Good Practice** <br>
+- When an object is destroyed, any pointers to that object will be left dangling.
+- Such pointers are not nulled automatically! It is the programmer’s responsibility to ensure that all pointers to an object that has just been destroyed are properly set to `nullptr`.
+
+### Legacy null pointer
+Both 0 and NULL should be **avoided** in modern C++. <br>
+
+**NOTE** :  The literal `0`, when used in the context of a null pointer, will be translated into whatever address the architecture uses to represent a null pointer.
+
+
+## Favor references over pointers
+A null pointer runs the risk of being dereferenced, and the ability to change what a pointer is pointing at can make creating dangling pointers easier. <br>
+
+- Since references can’t be bound to null, we don’t have to worry about null references
+- And because references must be bound to a valid object upon creation and then can not be reseated, dangling references are harder to create.
+
+## Pointers to constant
+We cannot point to a constant variable via non-constant pointer as this would allow the programmer to dereference the pointer and change the value
+```
+const int x { 5 }; // x is now const
+int* ptr { &x };   // compile error: cannot convert from const int* to int*
+```
+**SOLTUION**<br>
+A **pointer to a const** value  is a  pointer that points to a constant value. <br>
+```
+const int x{ 5 };
+const int* ptr { &x }; // okay: ptr is pointing to a "const int"
+```
+In the above example, `ptr` points to a `const int`. Because the data type being pointed to is const, the value being pointed to can’t be changed. <br>
+
+**HOWEVER** <br>
+because a pointer to const is not const itself (it just points to a const value), we can still change what the pointer is pointing at by assigning the pointer a new address.
+```
+const int x{ 5 };
+const int* ptr { &x }; // ptr points to const int x
+
+const int y{ 6 };
+ptr = &y; // okay: ptr now points at const int y
+```
+Pointer to constant can still point to non-constant variable:
+```
+int x{ 5 }; // non-const
+const int* ptr { &x }; // ptr points to a "const int"
+*ptr = 6; //still not allowed
+```
+## Constant Pointers
+- A const pointer is a pointer whose **address can not be change**d after initialization.
+- Use the const keyword **after the asterisk** in the pointer declaration
+```
+int x{ 5 };
+int* const ptr { &x };
+```
+**NOTE** : A const pointer **must be initialized** upon definition, and this value can’t be changed via assignment <br>
+**However**, because the value being pointed to is non-const,**it is possible to change the value** being pointed to via dereferencing the const
+
+## Const pointer to a const value
+A const pointer to a const value can not have its address changed, nor can the value it is pointing to be changed through the pointer.
+```
+int value { 5 };
+const int* const ptr { &value };
+```
+
+## Pass by Address
+Method sof pass the values:
+1. Pass by value
+2. Pass by reference
+3. Pass by address (using pointers)
+
+```
+void printByValue(std::string val) // The function parameter is a copy of str
+void printByReference(const std::string& ref) // The function parameter is a reference that binds to str
+void printByAddress(const std::string* ptr) // The function parameter is a pointer that holds the address of str
+```
+**How does it work** <br>
+1.  Instead of providing an object as an argument, the **caller provides an object’s address** (via a pointer)
+2.  `&object` returns the pointer to object which on passing is copied to function parameter pointer
+3.  Later we can dereference the pointer to access the lvalue
+
+
