@@ -5645,3 +5645,105 @@ auto* const ptr4{ getPtr() }; // std::string* const
 
 For `auto*` : <br>
 **Working** : 
+1. `const` on left means **make the deduced pointer type a pointer to `const`**
+2. `const` on  right means **Apply `const` to the deduced type**
+
+
+## std::optional - C++17
+```
+int doIntDivision(int x, int y)
+{
+    return x / y;
+}
+```
+Let's see how to manage functions like above which on wrong input can product undefined returns like `doIntDivision(1,0)`
+
+### std::optional
+- `std::optional`, which is a class template type that implements an optional value
+- `std::optional<T>` can either have a value of type `T`, or not
+```
+std::optional<int> doIntDivision(int x, int y){
+    if (y == 0)
+        return std::nullopt; // or return std::nullopt
+    return x / y;
+}
+
+int main(){
+    std::optional<int> result1 { doIntDivision(20, 5) };
+    if (result1) // if the function returned a value
+        std::cout << "Result 1: " << *result1 << '\n'; // get the value
+    else
+        std::cout << "Result 1: failed\n";
+
+    std::optional<int> result2 { doIntDivision(5, 0) };
+
+    if (result2)
+        std::cout << "Result 2: " << *result2 << '\n';
+    else
+        std::cout << "Result 2: failed\n";
+
+    return 0;
+}
+```
+**OUTPUT**
+```
+Result 1: 4
+Result 2: failed
+```
+
+### std::optional properties
+We can construct either construct a std::optional<T> with a value
+```
+std::optional<int> o1 { 5 };            // initialize with a value
+std::optional<int> o2 {};               // initialize with no value
+std::optional<int> o3 { std::nullopt }; // initialize with no value
+```
+Check if `std::optional` has value
+```
+if (o1.has_value()) // call has_value() to check if o1 has a value
+if (o2)             // use implicit conversion to bool to check if o2 has a value
+```
+Retrieve `std::optional` value
+```
+std::cout << *o1;             // dereference to get value stored in o1 (undefined behavior if o1 does not have a value)
+std::cout << o2.value();      // call value() to get value stored in o2 (throws std::bad_optional_access exception if o2 does not have a value)
+std::cout << o3.value_or(42); // call value_or() to get value stored in o3 (or value `42` if o3 doesn't have a value)
+```
+
+### Working on std::optional
+**Pointer vs std::optional** <br>
+- A `pointer` has reference semantics and a `std::optional` has value semantics
+- If we return a pointer **by address**, the pointer is copied back to the caller, not the object being pointed to. 
+- If we return a `std::optional` **by value**, the `std::optional` (including the contained value) is copied back to the caller.
+
+### std::expected C++ 23
+`std::expected` (introduced in C++23) is designed to handle the case where a function can return either an expected value or an unexpected error code.
+
+
+## Passing a std::optional
+```
+void greet(const std::string* name=nullptr){
+    std::cout << "Hello ";
+    std::cout << (name ? *name : "guest") << '\n';
+}
+
+int main(){
+    greet(); // we don't know who the user is yet
+
+    std::string joe{ "Joe" }; // must have an lvalue of the correct type to pass
+    greet(&joe); // we know the user is joe
+
+    return 0;
+}
+```
+
+Replace the greet function abvoe with this :
+```
+void greet(std::optional<std::string> name=std::nullopt) // makes a copy of the std::string
+{
+    std::cout << "Hello ";
+    std::cout << (name ? *name : "guest") << '\n';
+}
+```
+But it doesn't support references 'greet(&joe);` <br>
+**NOTE**  : However, because std::optional makes a copy of its argument, this becomes problematic when T is an expensive-to-copy type `(like std::string)`
