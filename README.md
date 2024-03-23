@@ -5454,3 +5454,72 @@ int main(){
 ```
 **The code above works just like the code before** <br>
 getHello() gets the copy of string and then a **temporary object is made** which is passed by reference to the foo function and as long as the temporary object remains in the called the the `s` returns the value to str::string by reference and the value is returned.
+
+
+### The caller can modify values through the reference
+
+When a non-const reference is returned from a function, the caller can use the reference to modify the value being returned.
+```
+int& max(int& x, int& y){
+    return (x > y) ? x : y;
+}
+
+int main(){
+    int a{ 5 };
+    int b{ 6 };
+
+    max(a, b) = 7; // sets the greater of a or b to 7
+    std::cout << a << b << '\n';
+}
+```
+OUTPUT
+```
+5 7
+```
+**EXPLAONATION** : Reference parameter `x` binds to argument `a`, and reference parameter `y` binds to argument `b` <br>
+In this case, that’s y, so the function returns y (which is still bound to b) back to the caller <br>
+Therefore, the expression `max(a, b) = 7` effectively resolves to `b = 7`. <br>
+
+### Return by address
+1. Return by address works almost identically to return by reference
+2. Here ointer to an object is returned instead of a reference to an object
+3. The object being returned by address must outlive the scope of the function returning the address, otherwise the caller will receive a dangling pointer
+4. The major advantage of return by address over return by reference is that we can have the function return `nullptr`
+5. The major disadvantage of return by address is that the caller has to remember to do a `nullptr` check before dereferencing the return
+
+**BEST PRACTICE** <br>
+Prefer return by reference over return by address unless the ability to return “no object” (using nullptr) is important.
+
+## In and out parameters
+Avoid out-parameters (except in the rare case where no better options exist) as they don't make it obvious for changes 
+```
+getSinCos(degrees, sin, cos); //this is not obvious
+```
+The code below obvious
+```
+x = getByValue(); // obvious that x is being modified
+```
+
+### When to pass by non-const reference
+Use pass by non-const reference when a parameter is an in-out-parameter generally used to fill a large C-style array or std::array with data
+```
+void someFcn(Foo& inout){
+    // modify inout
+}
+
+int main(){
+    Foo foo{};
+    someFcn(foo); // foo modified after this call, may not be obvious
+}
+```
+The alternative is to pass the object by value or const reference instead (as per usual) and return a new object by value
+```
+Foo someFcn(const Foo& in)
+{
+    Foo foo { in }; // copy here
+    // modify foo
+    return foo;
+}
+```
+
+
