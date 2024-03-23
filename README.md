@@ -5172,5 +5172,130 @@ void printByAddress(const std::string* ptr) // The function parameter is a point
 1.  Instead of providing an object as an argument, the **caller provides an object’s address** (via a pointer)
 2.  `&object` returns the pointer to object which on passing is copied to function parameter pointer
 3.  Later we can dereference the pointer to access the lvalue
+4.  When we pass by address, **we’re not copying the actual std::string object** -- we’re just copying the pointer (holding the address of the object) from the caller to the called function.
+5.  Since pointer is only 4 or 8 bytes, so **copying a pointer is always fast**.
+
+If we already had a pointer variable holding the address of `str`, , we could use that instead:
+```
+std::string* ptr { &str }; // define a pointer variable holding the address of str
+printByAddress(ptr)
+```
+
+### Things to note
+1. Pass by address allows the function to modify the argument’s value unless it is a pointer to constant value
+2. When passing a parameter by address, care should be taken to ensure the pointer is not a null pointer
+```
+void print(int* ptr){
+    if (ptr) {  // if ptr is not a null pointer    
+        std::cout << *ptr << '\n';
+    }
+//OR
+    if (!ptr) // if ptr is a null pointer, early return back to the caller
+        return;
+//OR
+    assert(ptr); // fail the program in debug mode if a null pointer is passed 
+}
+```
+4. Prefer `pass by const reference` over `pass by address` as `pass by const reference` needs to have a variable with address and can even take `literal`
+
+##  “optional” arguments
+```
+void greet(const std::string* name=nullptr){
+    std::cout << "Hello ";
+    std::cout << (name ? *name : "guest") << '\n';
+}
+int main(){
+    greet(); // we don't know who the user is yet
+}
+```
+The name parameter defaults to nullptr here. We can also use function overloading and make a functionwhich doesn't have any parameter which the above function call gets redirected to instead.<br>
+
+## Changing what a pointer parameter points at
+```
+void nullify(int* ptr2){
+    ptr2 = nullptr; // Make the function parameter a null pointer
+}
+
+int main(){
+    int x{ 5 };
+    int* ptr{ &x }; // ptr points to x
+    std::cout << "ptr is " << (ptr ? "non-null\n" : "null\n"); ---// ptr is non-null
+    nullify(ptr);
+    std::cout << "ptr is " << (ptr ? "non-null\n" : "null\n"); ---// ptr is non-null
+}
+```
+In the code above `ptr` that is pointing to `x` **doesn't become** `null` <br>
+**WHY ?** <br>
+Because when we pass by address we are only copying the address from argument to the pointer parameter, so we only making the parameter pointer point to `null` now and this doesn't impact the pointer pointing to x
+
+## Pass by address and reference
+Now instead of copying the addres froma  pointer we willl pass the address by reference
+```
+void nullify(int*& ptr2){
+    ptr2 = nullptr; // Make the function parameter a null pointer
+}
+
+int main(){
+    int x{ 5 };
+    int* ptr{ &x }; // ptr points to x
+    std::cout << "ptr is " << (ptr ? "non-null\n" : "null\n"); ---// ptr is non-null
+    nullify(ptr);
+    std::cout << "ptr is " << (ptr ? "non-null\n" : "null\n"); ---// ptr is non
+}
+```
+Here `refptr` is bound to `ptr`. This means any changes to `refptr` are made to `ptr`.
+
+## 0 and NULL are obsolete
+- `0` can be confused if it is a literal or a null-pointer.
+- The definition of preprocessor macro `NULL`** is not defined** by the language standard. It can be defined as `0`, `0L`, `((void*)0)`
+
+```
+void print(int x) { // this function accepts an integer
+	std::cout << "print(int): " << x << '\n';
+}
+
+void print(int* ptr) {// this function accepts an integer pointer
+	std::cout << "print(int*): " << (ptr ? "non-null\n" : "null\n");
+}
+
+int main() {
+	print(0);   // This calls print(int) as 0 is thought as a literal
+	print(NULL); //This can call anyone. In VS 2022 is calls pint(int) 
+}
+```
+
+## std::nullptr_t
+- The answer is that nullptr has type `std::nullptr_t`
+- `std::nullptr_t` can only hold one value
+- We can make a function that taken only `std::nullptr_t`
+
+```
+void print(std::nullptr_t){
+    std::cout << "in print(std::nullptr_t)\n";
+}
+
+void print(int*){
+    std::cout << "in print(int*)\n";
+}
+
+int main(){
+    print(nullptr); // calls print(std::nullptr_t)
+
+    int x { 5 };
+    int* ptr { &x };
+
+    print(ptr); // calls print(int*)
+
+    ptr = nullptr;
+    print(ptr); // calls print(int*) (since ptr has type int*)
+}
+```
+Remember that function overloading **matches on types**, not values.
 
 
+## Pass by reference is pass by address
+- References are normally implemented by the compiler using pointers
+- This means that behind the scenes, pass by reference is essentially just a pass by address
+- Pass by address just copies an address from the caller to the called function -- which is just passing an address by value.
+
+## Return by reference and address
