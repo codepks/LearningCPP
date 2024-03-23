@@ -5299,3 +5299,158 @@ Remember that function overloading **matches on types**, not values.
 - Pass by address just copies an address from the caller to the called function -- which is just passing an address by value.
 
 ## Return by reference and address
+
+### Return by reference
+ Return by reference **returns a reference that is bound to the object** being returned, which avoids making a copy of the return value.
+```
+std::string&       returnByReference(); // returns a reference to an existing std::string (cheap)
+const std::string& returnByReferenceToConst(); // returns a const reference to an existing std::string (cheap)
+```
+**Example**
+```
+const std::string& getProgramName() { // returns a const reference
+    static const std::string s_programName { "Calculator" }; // has static duration, destroyed at end of program
+    return s_programName;
+}
+
+int main(){
+    std::cout << "This program is named " << getProgramName(); //returning an rvalue
+}
+```
+- The object being referenced **should outlive the function** else the reference would be left **dangling** (referencing an object that has been destroyed)
+- `s_programName` has static duration, `s_programName` will exist until the end of the program
+- When `main()` accesses the returned reference, it is actually accessing `s_programName`
+
+### Dangling Reference
+**Example 1** 
+```
+std::string& getProgramName(){
+    std::string programName{ "Calculator" }; // now a non-static local variable, destroyed when function ends
+    return programName;
+}
+
+int main(){
+    std::cout << "This program is named " << getProgramName(); // undefined behavior
+}
+```
+- The code above give undefined behaviour because `programName` is destroyed at the end of the function.
+- Because of this returned reference is now dangling
+
+**Example 2 - dangling due temporary object destruction**
+```
+const int& returnByConstReference(){
+    return 5; // returns const reference to temporary object
+}
+
+int main(){
+    const int& ref { returnByConstReference() };
+    std::cout << ref; // undefined behavior
+}
+```
+- `returnByConstReference()` is returning an integer literal, but the return type of the function is `const int&`
+- This results in the creation of a **temporary reference** bound to a temporary object holding value `5`
+- The temporary object then goes out of scope, leaving the reference dangling.
+- In `main()`, it is too late to extend the lifetime of the temporary object -- as it has already been destroyed
+- `ref` is bound to a dangling reference, and use of the value of `ref` will result in undefined behavior.
+
+**Example 3** <br>
+```
+const int& returnByConstReference(const int& ref){
+    return ref;
+}
+
+int main(){
+    // case 2: indirect binding
+    const int& ref2 { returnByConstReference(5) }; // binds to dangling reference
+    std::cout << ref2 << '\n'; // undefined behavior
+}
+```
+- In case 2, a temporary object is created to hold value `5`, which function parameter `ref` binds to
+- The function just returns this reference back to the caller, which then uses the reference to initialize `ref2`
+- Because this is not a direct binding to the temporary object,  this leaves `ref2` dangling, and its subsequent use is undefined behavior.
+
+### Don’t return non-const static local variables by reference
+```
+const int& getNextId(){
+    static int s_x{ 0 }; // note: variable is non-const
+    ++s_x; // generate the next id
+    return s_x; // and return a reference to it
+}
+
+int main(){
+    const int& id1{ getNextId() }; // id1 is a reference
+    const int& id2{ getNextId() }; // id2 is a reference
+
+    std::cout << id1 << id2 << '\n';
+}
+```
+**OUTPUT**
+```
+2 2
+```
+
+- Here we will get same value because both the `id1` and `id2` will point to the same object `s_x`.
+- That's why avoid returning non-const static local variables, **always return const static variables** (before example 1)
+
+### Assigning/initializing a normal variable with a returned reference makes a copy
+
+```
+const int& getNextId(){
+    static int s_x{ 0 }; // note: variable is non-const
+    ++s_x; // generate the next id
+    return s_x; // and return a reference to it
+}
+
+int main(){
+    const int& id1{ getNextId() }; // id1 takes copy of return value from the function
+    const int& id2{ getNextId() }; // id2 takes copy of return value from the function
+
+    std::cout << id1 << id2 << '\n';
+}
+```
+**OUTPUT**
+```
+1 2
+```
+If a function returns a reference, and that reference is used to initialize or assign to a non-reference variable, the return value will be copied.
+
+### OKAY Returning  reference parameters by reference
+_**REMEMBER THIS CASE**_ --- _**REMEMBER THIS CASE**_
+
+```
+const std::string& firstAlphabetical(const std::string& a, const std::string& b){
+	return (a < b) ? a : b; // We can use operator< on std::string to determine which comes first alphabetically
+}
+
+int main(){
+	std::string hello{ "Hello" };
+	std::string world{ "World" };
+	std::cout << firstAlphabetical(hello, world) << '\n'; //The argument exists in the scope of called before and after the function call
+
+}
+```
+OUTPUT
+```
+Hello
+```
+This code doesn't produce any dangling reference and it works. How?
+- In order to pass an argument to a function, the argument must exist in the scope of the caller
+- When the called function returns, that object must still exist in the scope of the caller
+
+### OKAY return by const reference an rvalue passed by const reference
+```
+const std::string& foo(const std::string& s){
+    return s;
+}
+
+std::string getHello(){
+    return std::string{"Hello"};
+}
+
+int main(){
+    const std::string s{ foo(getHello()) };
+    std::cout << s;
+}
+```
+**The code above works just like the code before** <br>
+getHello() gets the copy of string and then a **temporary object is made** which is passed by reference to the foo function and as long as the temporary object remains in the called the the `s` returns the value to str::string by reference and the value is returned.
