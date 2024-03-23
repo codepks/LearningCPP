@@ -4825,3 +4825,13 @@ const std::string& getProgramName(){
 }
 ```
 The function call above leads to undefined behaviour. 
+
+### References aren’t objects
+- The compiler will optimize references away by replacing all occurrences of a reference with the referent
+- You can’t have a reference to a reference, since an lvalue reference must reference an identifiable object
+```
+int var{};
+int& ref1{ var };
+int& ref2{ ref1 };
+```
+`ref1` is a reference to `var`, when used in an expression (such as an initializer), `ref1` evaluates to `var`. So `ref2` is just a normal lvalue reference (as indicated by its type `int&`), bound to `var`.
