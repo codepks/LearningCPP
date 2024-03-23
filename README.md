@@ -5523,3 +5523,125 @@ Foo someFcn(const Foo& in)
 ```
 
 
+## Type deduction with pointers, references, and const
+
+### auto drops const and consexpr
+```
+const double foo(){
+    return 5.6;
+}
+
+int main(){
+    const double cd{ 7.8 };
+    auto x{ cd };    // double (const dropped)
+    auto y{ foo() }; // double (const dropped)
+}
+```
+`auto` doesn't deduce `const` from the datatype, you need to put const explicitily in order to deduce const or constexpr objects.
+```
+const auto x{ foo() };  // const double (const dropped, const reapplied)
+constexpr auto y{ cd }; // constexpr double (constexpr dropped, constexpr reapplied)
+const auto z { cd };    // const double (constexpr dropped, const applied)
+```
+
+### auto drop references
+```
+std::string& getRef(); // some function that returns a reference
+
+int main(){
+    auto ref { getRef() }; // type deduced as std::string (not std::string&)
+}
+```
+you can reapply the reference at the point of definition:
+```
+auto& ref { getRef() };
+```
+
+### Top-level const and low-level const
+**Top Level** consts : which applies to objects itself
+```
+const int x;    // this const applies to x, so it is top-level
+int* const ptr; // this const applies to ptr, so it is top-level
+```
+**Low level** consts : applies to object referenced to
+```
+const int& ref; // this const applies to the object being referenced, so it is low-level
+const int* ptr; // this const applies to the object being pointed to, so it is low-level
+```
+
+**Top level** consts are **dropped** in auto deduction
+
+### Const ref type deduction
+```
+const std::string& getConstRef(); // some function that returns a reference to const
+
+int main(){
+    auto ref1{ getConstRef() }; // std::string (reference dropped, then top-level const dropped from result)
+}
+```
+- `getConstRef()` returns a `const std::string&`, the reference is dropped first, leaving us with a `const std::string`.
+- Dropping a reference may change a low-level const to a top-level const: const std::string& is a low-level `const`
+- This `const` is now a top-level const, so it is also dropped, leaving the deduced type as `std::string`
+```
+const auto ref2{ getConstRef() };  // const std::string (reference dropped, const reapplied)
+```
+`ref2`, this is similar to the `ref1` case, except we’re reapplying the const qualifier, so the deduced type is `const std::string`.
+```
+auto& ref3{ getConstRef() };
+```
+Things get more interesting with `ref3`. Normally the reference would be dropped first, but since we’ve reapplied the reference, it is not dropped. That means the type is still `const std::string&`. And since this const is a low-level const, it is not dropped. Thus the deduced type is `const std::string&`.
+
+
+### auto and constexpr references
+These work the same way as const references.
+```
+constexpr std::string_view hello { "Hello" };
+
+constexpr const std::string_view& getConstRef(){
+    return hello;
+}
+
+int main(){
+    auto ref1{ getConstRef() };            // std::string_view (top-level const and reference dropped)
+    constexpr auto ref2{ getConstRef() };  // constexpr std::string_view (constexpr reapplied, reference dropped)
+
+    auto& ref3{ getConstRef() };           // const std::string_view& (reference reapplied, low-level const not dropped)
+}
+```
+
+
+### auto and pointers
+Unlike reference, **pointers are not dropped**
+```
+std::string* getPtr(); 
+
+int main(){
+    auto ptr1{ getPtr() }; // std::string*
+    auto* ptr1{ getPtr() }; // std::string*
+
+    return 0;
+}
+```
+`auto` doesn't drop pointer here, even with `auto*` the deduction is same. <br>
+In the second case pointer is only applied once on `std::string` and it doesn't make any double pointer. <br>
+**Important Factors** <br>
+auto* must have a pointer initilizer
+```
+auto ptr3{ *getPtr() };      // std::string (because we dereferenced getPtr())
+auto* ptr4{ *getPtr() };     // does not compile (initializer not a pointer)
+```
+Reason : `ptr4` has type `std::string*`, and we can’t initialize a `std::string*` with an initializer that is not a pointer.
+
+### auto and const pointers
+For `auto` : <br>
+**Working** :** Apply `const` to the deduced type**.  So in the case of `ptr1` and `ptr2`, the deduced type is `std::string*`, and then const is applied, making the final type `std::string* const` :
+```
+const auto ptr1{ getPtr() };  // std::string* const
+auto const ptr2 { getPtr() }; // std::string* const
+
+const auto* ptr3{ getPtr() }; // const std::string*
+auto* const ptr4{ getPtr() }; // std::string* const
+```
+
+For `auto*` : <br>
+**Working** : 
