@@ -4835,3 +4835,92 @@ int& ref1{ var };
 int& ref2{ ref1 };
 ```
 `ref1` is a reference to `var`, when used in an expression (such as an initializer), `ref1` evaluates to `var`. So `ref2` is just a normal lvalue reference (as indicated by its type `int&`), bound to `var`.
+
+### reference to const
+```
+const int x { 5 };    // x is a non-modifiable lvalue
+const int& ref { x };
+```
+Such a reference is called an **lvalue reference to a const value**. They can be used to access but not modify the value being referenced. <br><br>
+
+**lvalue const reference to modifiable value** <br>
+```
+int x { 5 };          // x is a modifiable lvalue
+const int& ref { x }; // okay: we can bind a const reference to a modifiable lvalue
+
+std::cout << ref << '\n'; // okay: we can access the object through our const reference
+ref = 7;                  // error: we can not modify an object through a const reference
+```
+A const reference can refer to a modifiable value but it still cannot modify the value via reference.
+
+**lvalue reference to const variables** <br>
+although lvalue reference can't refere to constant values but constant lvalue references can refer to constant values.
+```
+const int& ref { 5 }
+```
+- When this happens, a **temporary object is created** and initialized with the rvalue, and the reference to const is bound to that temporary object.
+- When a const lvalue reference is directly bound to a temporary object, the **lifetime of the temporary object is extended** to match the lifetime of the reference
+```
+const int& ref { 5 }; // The temporary object holding value 5 has its lifetime extended to match ref
+std::cout << ref << '\n'; // Therefore, we can safely use it here
+```
+When both `ref` and the temporary object go out of scope and are destroyed at the end of the block.
+
+### Constexpr references
+- Constexpr references have a particular limitation: they can only be bound to objects with static duration (either **globals or static locals**)
+- This is because the compiler knows where static objects will be instantiated in memory, so it can treat that address as a compile-time constant
+- A constexpr reference cannot bind to a (non-static) local variable. This is because the address of local variables is not known until the function they are defined within is actually called
+```
+int g_x { 5 };
+
+int main(){
+    constexpr int& ref1 { g_x }; // ok, can bind to global
+    static int s_x { 6 };
+    constexpr int& ref2 { s_x }; // ok, can bind to static local
+    int x { 6 };
+    constexpr int& ref3 { x }; // compile error: can't bind to non-static object
+    static const int s_x { 6 }; // a const int
+    constexpr const int& ref2 { s_x }; 
+}
+```
+
+### Summary
+- Lvalue references can only bind to modifiable lvalues.
+- Lvalue references to const can bind to modifiable lvalues, non-modifiable lvalues, and rvalues
+- **Temporaries returned from a function** (even ones returned by const reference) are **not eligible** for lifetime extension
+
+## Pass by lvalue reference
+- In pass by value, fundamental data types are cheap to copy
+- But class types are difficult to copy for `e.g. std::string`
+
+<br>**SOLUTION**<br>
+```
+void printValue(std::string& y) { // type changed to std::string&
+    std::cout << y << '\n';
+} // y is destroyed here
+
+int main(){
+    std::string x { "Hello, world!" };
+    printValue(x); // x is now passed by reference into reference parameter y (inexpensive)
+}
+```
+- When using pass by reference, we declare a function parameter as a **reference type** (or const reference type)
+- When the function is called, each reference parameter is **bound** to the appropriate argument
+- When using pass by reference, any changes made to the reference parameter will affect the argument
+- In pass by reference we cannot pass `const` or `literal`
+```
+const int z { 5 };
+printValue(z); // error: z is a non-modifiable lvalue
+printValue(5); // error: 5 is an rvalue
+```
+**SOLTUION** <br>
+ Pass by const lvalue reference can bind to modifiable lvalues, non-modifiable lvalues, and rvalues.
+
+<br><br>
+**BEST PRACTICE** <br>
+- As a rule of thumb, pass fundamental types by **value**, and `class` (or `struct`) types by const reference
+- Other common types to pass by **value**: `enumerated` types and `std::string_view`
+- Other common types to pass by (const) **reference**: `std::string`, `std::array`, and `std::vector`
+- An object is cheap to copy if it uses 2 or fewer “words” of memory (<= 2 * sizeof(void*))
+- In some places copy by value give compiler oppurtunity to perform move semantics
+
