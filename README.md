@@ -5747,3 +5747,25 @@ void greet(std::optional<std::string> name=std::nullopt) // makes a copy of the 
 ```
 But it doesn't support references 'greet(&joe);` <br>
 **NOTE**  : However, because std::optional makes a copy of its argument, this becomes problematic when T is an expensive-to-copy type `(like std::string)`
+
+# Enums and Structs
+C++ has two different categories of compound types:
+1. Enumerated types (including unscoped and scoped enumerations)
+2. Class types (including structs, classes, and unions)
+
+## Using program-defined types throughout a multi-file program
+-  Program-defined types are typically defined in header files
+-  hen #included into any code file that requires that type definition
+-  These header files are typically given the same name as the program-defined type
+
+## Type definitions are partially exempt from the one-definition rule (ODR)
+- Compiler typically needs to see the full definition to use a given type
+- We must be able to propagate the full type definition to each code file that needs it
+- Types are partially exempt from the one-definition rule
+
+Caveats:
+- First, you can still only have one type definition per code file
+- Second, all of the type definitions for a given type must be identical
+
+
+
