@@ -1,5 +1,7 @@
 # LearningCPP
 
+Continue making notes from the highlighted notes from Learncpp.com as this notes would have different sources and it should be one place to learn from different notes.
+
 # Introduction
 The number of bits that make up a single command vary -- for example, some CPUs process instructions that are always 32 bits long, whereas some other CPUs (such as the x86/x64 family, which you may be using) have instructions that can be a variable length. <br>
 
