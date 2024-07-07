@@ -1,0 +1,3 @@
+﻿  CPPClient2.cpp
+CPPClient2.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) class CPPServerInterface * __cdecl CreateCPPServer(void)" (__imp_?CreateCPPServer@@YAPEAVCPPServerInterface@@XZ) referenced in function main
+C:\Users\prassha\source\repos\COM\CPPClientAndServer\x64\Debug\CPPClient2.exe : fatal error LNK1120: 1 unresolved externals
