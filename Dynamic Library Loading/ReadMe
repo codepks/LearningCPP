@@ -1,0 +1,2 @@
+1. In dynamic loading, I had no project properties to take care of
+2. In CPPClient2, I had to add reference to the other porject
